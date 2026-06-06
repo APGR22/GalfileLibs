@@ -10,7 +10,7 @@ namespace galfile::helpers
     {
         if (bytes == 0)
         {
-            return "0";
+            return "00";
         }
 
         std::string buffer;
@@ -30,6 +30,11 @@ namespace galfile::helpers
             }
 
             bytes /= 16;
+        }
+
+        if (buffer.size() < 2)
+        {
+            buffer += '0';
         }
 
         std::reverse(buffer.begin(), buffer.end());

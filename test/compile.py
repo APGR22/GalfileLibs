@@ -9,8 +9,8 @@ files = (
 )
 output = "Test/test"
 libs = (
-    # "-lssl",
-    # "-lcrypto",
+    "-lssl",
+    "-lcrypto",
 )
 options = (
     "-O3",
