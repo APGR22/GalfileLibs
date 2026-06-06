@@ -1,0 +1,5 @@
+git configs.txt
+.vscode
+*.exe
+*.elf
+test/example
