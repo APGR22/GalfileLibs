@@ -1,6 +1,7 @@
 #include "../filesystem/file/file.hpp"
 #include "../filesystem/folder/folder.hpp"
 #include "../helpers/checksum.hpp"
+#include "../dependencies/json/json.hpp"
 #include <iostream>
 
 int main()
@@ -17,6 +18,11 @@ int main()
     folder = std::move(folder);
 
     std::cout << "Can append folder itself: " << folder.append_folder(folder) << std::endl;
+
+    nlohmann::json json;
+    json["info"] = "success";
+
+    std::cout << json["info"] << std::endl;
 
     return 0;
 }
