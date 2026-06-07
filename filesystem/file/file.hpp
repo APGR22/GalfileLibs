@@ -14,21 +14,27 @@ namespace galfile::filesystem::file
     {
         private:
             FILE *file_ptr = nullptr;
+            std::string name;
             std::filesystem::path filepath;
+            bool auto_close = true;
 
         public:
-            File(FILE *file_ptr, const std::filesystem::path &filepath)
-            : file_ptr(file_ptr), filepath(filepath)
+            File(FILE *file_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
+            : file_ptr(file_ptr), name(name), filepath(filepath), auto_close(auto_close)
             {}
 
             File(const File &other)
-            : file_ptr(other.file_ptr), filepath(other.filepath)
+            : file_ptr(other.file_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
             {}
 
             File(File &&other)
-            : file_ptr(other.file_ptr), filepath(other.filepath)
+            : file_ptr(other.file_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
             {
-                other.close();
+                if (this == &other) return;
+
+                other.file_ptr = nullptr;
+                other.name.clear();
+                other.filepath.clear();
             }
 
             int read_c(type::seekpos_t seekpos) const
@@ -106,11 +112,16 @@ namespace galfile::filesystem::file
 
             void close()
             {
-                if (this->file_ptr)
+                if (this->file_ptr && this->auto_close)
                 {
                     fclose(this->file_ptr);
                     this->file_ptr = nullptr;
                 }
+            }
+
+            void set_auto_close(bool value)
+            {
+                this->auto_close = value;
             }
 
             size_t get_size() const
@@ -121,11 +132,9 @@ namespace galfile::filesystem::file
                 return static_cast<size_t>( ftell(this->file_ptr) );
             }
 
-            std::string get_name() const
+            const std::string &get_name() const
             {
-                if (this->file_ptr == nullptr) return "";
-
-                return this->filepath.filename().generic_string();
+                return this->name;
             }
 
             const std::filesystem::path &get_filepath() const
@@ -150,7 +159,9 @@ namespace galfile::filesystem::file
                     this->close();
 
                     this->file_ptr = other.file_ptr;
+                    this->name = other.name;
                     this->filepath = other.filepath;
+                    this->auto_close = other.auto_close;
                 }
 
                 return *this;
@@ -163,9 +174,13 @@ namespace galfile::filesystem::file
                     this->close();
 
                     this->file_ptr = other.file_ptr;
+                    this->name = other.name;
                     this->filepath = other.filepath;
+                    this->auto_close = other.auto_close;
 
-                    other.close();
+                    other.file_ptr = nullptr;
+                    other.filepath.clear();
+                    other.name.clear();
                 }
 
                 return *this;
@@ -182,15 +197,15 @@ namespace galfile::filesystem::file
             }
     };
 
-    inline File open_existing(const std::filesystem::path &filepath)
+    inline File open_existing(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
         std::string filepath_s = filepath.generic_string();
         FILE *file_ptr = fopen(filepath_s.c_str(), "rb+");
 
-        return File(file_ptr, filepath);
+        return File(file_ptr, name, filepath, auto_close);
     }
 
-    inline File create_new(const std::filesystem::path &filepath)
+    inline File create_new(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
         std::string filepath_s = filepath.generic_string();
         FILE *temp = fopen(filepath_s.c_str(), "w");
@@ -199,6 +214,6 @@ namespace galfile::filesystem::file
             temp == nullptr;
         }
 
-        return open_existing(filepath);
+        return open_existing(filepath, name, auto_close);
     }
 }

@@ -1,33 +1,22 @@
 #include "../filesystem/file/file.hpp"
+#include "../filesystem/folder/folder.hpp"
 #include "../helpers/checksum.hpp"
 #include <iostream>
 
 int main()
 {
-    auto file = galfile::filesystem::file::open_existing("test/example/test.txt");
+    auto file = galfile::filesystem::file::open_existing("test/example/test.txt", "01.txt", true);
 
     std::cout << "Opened: " << file.is_opened() << std::endl;
 
-    file.write_set(0, '0', 1024);
+    auto folder = galfile::filesystem::folder::create_new("dir", false);
+    folder.append_file(file);
 
-    unsigned char write_buffer[] = "wong saya suka kok";
-    file.write(0, write_buffer, sizeof(write_buffer)-1);
+    std::cout << "File exists: " << folder.is_file_exists(file.get_name()) << std::endl;
 
-    unsigned char read_buffer[sizeof(write_buffer)-1];
-    memset(read_buffer, 0, sizeof(read_buffer));
+    folder = std::move(folder);
 
-    file.read(0, read_buffer, sizeof(read_buffer));
-
-    for (uint64_t index = 0; index < sizeof(read_buffer); index++)
-    {
-        std::cout << read_buffer[index];
-    }
-    std::cout << std::endl;
-
-    std::cout << file.read_c(0) << std::endl;
-
-    std::string checksum = galfile::helpers::checksum(read_buffer, sizeof(read_buffer));
-    std::cout << checksum << std::endl;
+    std::cout << "Can append folder itself: " << folder.append_folder(folder) << std::endl;
 
     return 0;
 }
