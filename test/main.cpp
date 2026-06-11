@@ -3,22 +3,15 @@
 
 int main()
 {
-    auto filesystem = galfile::filesystem::Filesystem();
-    auto *folder = filesystem.mkdirs("/media/linux/gamer");
+    auto file = galfile::filesystem::file::create_new("test/example/test.txt", "custom");
 
-    std::cout << folder << std::endl;
-    if (folder)
-    {
-        std::cout << folder->get_name() << std::endl;
-    }
+    unsigned char text[] = "hello world";
 
-    folder = filesystem.cd("./media/linux");
+    file.write(0, text, sizeof(text)-1);
 
-    std::cout << folder << std::endl;
-    if (folder)
-    {
-        std::cout << folder->get_name() << std::endl;
-    }
+    int c = file.read_c(sizeof(text)-1 - 4);
+
+    printf("c = %c\n", c);
 
     return 0;
 }

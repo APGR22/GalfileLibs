@@ -3,9 +3,13 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <type_traits>
+#include <memory>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include "../../io/ioobject.hpp"
+#include "../../io/object/file.hpp"
 #include "../../type/int.hpp"
 
 namespace galfile::filesystem::file
@@ -13,55 +17,58 @@ namespace galfile::filesystem::file
     class File
     {
         private:
-            FILE *file_ptr = nullptr;
+            std::shared_ptr<io::IOObject> io_ptr;
             std::string name;
             std::filesystem::path filepath;
             bool auto_close = true;
 
         public:
-            File(FILE *file_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
-            : file_ptr(file_ptr), name(name), filepath(filepath), auto_close(auto_close)
+            File(std::shared_ptr<io::IOObject> &io_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
+            :
+                io_ptr(io_ptr),
+                name(name),
+                filepath(filepath),
+                auto_close(auto_close)
             {}
 
             File(const File &other)
-            : file_ptr(other.file_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
+            : io_ptr(other.io_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
             {}
 
             File(File &&other)
-            : file_ptr(other.file_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
+            : io_ptr(other.io_ptr), name(other.name), filepath(other.filepath), auto_close(other.auto_close)
             {
                 if (this == &other) return;
 
-                other.file_ptr = nullptr;
                 other.name.clear();
                 other.filepath.clear();
             }
 
             int read_c(type::seekpos_t seekpos) const
             {
-                if (this->file_ptr == nullptr) return -1;
+                if (!this->io_ptr->is_opened()) return -1;
 
-                fseek(this->file_ptr, seekpos, SEEK_SET);
-                return fgetc(this->file_ptr);
+                this->io_ptr->fseek(seekpos, SEEK_SET);
+                return this->io_ptr->fgetc();
             }
 
             size_t read(type::seekpos_t seekpos, unsigned char *dst_bytes, size_t max_size) const
             {
-                if (this->file_ptr == nullptr) return 0;
+                if (!this->io_ptr->is_opened()) return 0;
                 if (dst_bytes == nullptr) return 0;
                 if (max_size == 0) return 0;
 
-                fseek(this->file_ptr, seekpos, SEEK_SET);
+                this->io_ptr->fseek(seekpos, SEEK_SET);
 
-                return fread(dst_bytes, sizeof(unsigned char), max_size, this->file_ptr);
+                return this->io_ptr->fread(dst_bytes, sizeof(unsigned char), max_size);
             }
 
             type::sizec_t write_c(type::seekpos_t seekpos, unsigned char byte)
             {
-                if (this->file_ptr == nullptr) return 0;
+                if (!this->io_ptr->is_opened()) return 0;
 
-                fseek(this->file_ptr, seekpos, SEEK_SET);
-                int ret = fputc(byte, this->file_ptr);
+                this->io_ptr->fseek(seekpos, SEEK_SET);
+                int ret = this->io_ptr->fputc(byte);
 
                 if (ret != EOF) return 1;
                 else return 0;
@@ -69,53 +76,50 @@ namespace galfile::filesystem::file
 
             size_t write_set(type::seekpos_t seekpos, unsigned char byte, size_t size)
             {
-                if (this->file_ptr == nullptr) return 0;
+                if (!this->io_ptr->is_opened()) return 0;
 
-                fseek(this->file_ptr, seekpos, SEEK_SET);
+                this->io_ptr->fseek(seekpos, SEEK_SET);
 
                 unsigned char buffer[size];
                 memset(buffer, byte, size);
 
-                return fwrite(buffer, sizeof(unsigned char), size, this->file_ptr);
+                return this->io_ptr->fwrite(buffer, sizeof(unsigned char), size);
             }
 
             size_t write(type::seekpos_t seekpos, const unsigned char *bytes, size_t size)
             {
-                if (this->file_ptr == nullptr) return 0;
+                if (!this->io_ptr->is_opened()) return 0;
                 if (bytes == nullptr) return 0;
                 if (size == 0) return 0;
 
-                fseek(this->file_ptr, seekpos, SEEK_SET);
-                return fwrite(bytes, sizeof(unsigned char), size, this->file_ptr);
+                this->io_ptr->fseek(seekpos, SEEK_SET);
+                return this->io_ptr->fwrite(bytes, sizeof(unsigned char), size);
             }
 
             bool clear()
             {
                 this->close();
 
-                std::string filepath_s = this->filepath.generic_string();
-                FILE *temp = fopen(filepath_s.c_str(), "w");
-                if (temp)
+                this->io_ptr->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
+                if (this->io_ptr->is_opened())
                 {
-                    fclose(temp);
-                    temp = nullptr;
+                    this->io_ptr->fclose();
                 }
                 else
                 {
                     return false;
                 }
 
-                this->file_ptr = fopen(filepath_s.c_str(), "rb+");
+                this->io_ptr->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
                 return true;
             }
 
             void close()
             {
-                if (this->file_ptr && this->auto_close)
+                if (this->io_ptr->is_opened() && this->auto_close)
                 {
-                    fclose(this->file_ptr);
-                    this->file_ptr = nullptr;
+                    this->io_ptr->fclose();
                 }
             }
 
@@ -126,10 +130,10 @@ namespace galfile::filesystem::file
 
             size_t get_size() const
             {
-                if (this->file_ptr == nullptr) return 0;
+                if (!this->io_ptr->is_opened()) return 0;
 
-                fseek(this->file_ptr, 0, SEEK_END);
-                return static_cast<size_t>( ftell(this->file_ptr) );
+                this->io_ptr->fseek(0, SEEK_END);
+                return static_cast<size_t>( this->io_ptr->ftell() );
             }
 
             const std::string &get_name() const
@@ -144,7 +148,7 @@ namespace galfile::filesystem::file
 
             bool is_opened() const
             {
-                return this->file_ptr != nullptr;
+                return this->io_ptr->is_opened();
             }
 
             bool is_empty() const
@@ -158,7 +162,7 @@ namespace galfile::filesystem::file
                 {
                     this->close();
 
-                    this->file_ptr = other.file_ptr;
+                    this->io_ptr = other.io_ptr;
                     this->name = other.name;
                     this->filepath = other.filepath;
                     this->auto_close = other.auto_close;
@@ -173,12 +177,11 @@ namespace galfile::filesystem::file
                 {
                     this->close();
 
-                    this->file_ptr = other.file_ptr;
+                    this->io_ptr = other.io_ptr;
                     this->name = other.name;
                     this->filepath = other.filepath;
                     this->auto_close = other.auto_close;
 
-                    other.file_ptr = nullptr;
                     other.filepath.clear();
                     other.name.clear();
                 }
@@ -188,7 +191,7 @@ namespace galfile::filesystem::file
 
             bool operator==(const File &other) const
             {
-                return this->file_ptr == other.file_ptr;
+                return &(this->io_ptr) == &(other.io_ptr);
             }
 
             ~File()
@@ -197,23 +200,29 @@ namespace galfile::filesystem::file
             }
     };
 
-    inline File open_existing(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
+    template<class T = io::object::SingleFile>
+    typename std::enable_if_t<std::is_base_of_v<io::IOObject, T>, File>
+        open_existing(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
-        std::string filepath_s = filepath.generic_string();
-        FILE *file_ptr = fopen(filepath_s.c_str(), "rb+");
+        std::shared_ptr<io::IOObject> io_object = std::make_shared<T>(T(filepath));
+        io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return File(file_ptr, name, filepath, auto_close);
+        return File(io_object, name, filepath, auto_close);
     }
 
-    inline File create_new(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
+    template<class T = io::object::SingleFile>
+    typename std::enable_if_t<std::is_base_of_v<io::IOObject, T>, File>
+        create_new(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
-        std::string filepath_s = filepath.generic_string();
-        FILE *temp = fopen(filepath_s.c_str(), "w");
-        if (temp)
+        std::shared_ptr<io::IOObject> io_object = std::make_shared<T>(T(filepath));
+        io_object->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
+        if (io_object->is_opened())
         {
-            temp == nullptr;
+            io_object->fclose();
         }
 
-        return open_existing(filepath, name, auto_close);
+        io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+
+        return File(io_object, name, filepath, auto_close);
     }
 }
