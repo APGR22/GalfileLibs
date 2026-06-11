@@ -2,17 +2,17 @@
 
 #include <filesystem>
 #include <cstdio>
-#include "../ioobject.hpp"
+#include "../object.hpp"
 
 namespace galfile::io::object
 {
-    class SingleFile : public io::IOObject
+    class SingleFile : public io::Object
     {
         private:
             FILE *file = nullptr;
 
         public:
-            SingleFile(const std::filesystem::path &filepath) : io::IOObject(filepath)
+            SingleFile(const std::filesystem::path &filepath) : io::Object(filepath)
             {}
 
             int fopen(io::IOMode mode)

@@ -8,8 +8,8 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include "../../io/ioobject.hpp"
-#include "../../io/object/file.hpp"
+#include "../../io/object.hpp"
+#include "../../io/object/single_file.hpp"
 #include "../../type/int.hpp"
 
 namespace galfile::filesystem::file
@@ -17,13 +17,13 @@ namespace galfile::filesystem::file
     class File
     {
         private:
-            std::shared_ptr<io::IOObject> io_ptr;
+            std::shared_ptr<io::Object> io_ptr;
             std::string name;
             std::filesystem::path filepath;
             bool auto_close = true;
 
         public:
-            File(std::shared_ptr<io::IOObject> &io_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
+            File(std::shared_ptr<io::Object> &io_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
             :
                 io_ptr(io_ptr),
                 name(name),
@@ -201,20 +201,20 @@ namespace galfile::filesystem::file
     };
 
     template<class T = io::object::SingleFile>
-    typename std::enable_if_t<std::is_base_of_v<io::IOObject, T>, File>
+    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, File>
         open_existing(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
-        std::shared_ptr<io::IOObject> io_object = std::make_shared<T>(T(filepath));
+        std::shared_ptr<io::Object> io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         return File(io_object, name, filepath, auto_close);
     }
 
     template<class T = io::object::SingleFile>
-    typename std::enable_if_t<std::is_base_of_v<io::IOObject, T>, File>
+    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, File>
         create_new(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
-        std::shared_ptr<io::IOObject> io_object = std::make_shared<T>(T(filepath));
+        std::shared_ptr<io::Object> io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
         if (io_object->is_opened())
         {

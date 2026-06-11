@@ -11,13 +11,13 @@ namespace galfile::io
         KEEP_EXISTING_AND_READ_WRITE,
     };
 
-    class IOObject
+    class Object
     {
         protected:
             std::filesystem::path _filepath;
 
         public:
-            IOObject(const std::filesystem::path &filepath)
+            Object(const std::filesystem::path &filepath)
             : _filepath(filepath)
             {}
 
