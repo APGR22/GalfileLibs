@@ -52,26 +52,33 @@ namespace galfile::filesystem::folder
                 other.folders.clear();
             }
 
-            bool append_file(const file::File &file)
+            file::File *append_file(const file::File &file)
             {
-                if (this->files.contains(file.get_name())) return false;
-                if (this->folders.contains(file.get_name())) return false;
+                if (this->files.contains(file.get_name())) return nullptr;
+                if (this->folders.contains(file.get_name())) return nullptr;
 
-                this->files.insert({file.get_name(), file});
-                return true;
+                auto pair = this->files.insert({file.get_name(), file});
+                auto &item = pair.first->second;
+
+                return &item;
             }
 
-            bool append_folder(const Folder &folder)
+            Folder *append_folder(const Folder &folder)
             {
-                if (this == &folder) return false;
-                if (this->folders.contains(folder.name)) return false;
-                if (this->files.contains(folder.name)) return false;
+                if (this == &folder) return nullptr;
+                if (this->folders.contains(folder.name)) return nullptr;
+                if (this->files.contains(folder.name)) return nullptr;
 
                 auto pair = this->folders.insert({folder.name, folder});
                 auto &item = pair.first->second;
                 item.parent = this;
 
-                return true;
+                return &item;
+            }
+
+            const std::string &get_name() const
+            {
+                return this->name;
             }
 
             file::File *get_file(const std::string &name)

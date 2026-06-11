@@ -1,21 +1,23 @@
-#include "../filesystem/path/path.hpp"
+#include "../filesystem/filesystem.hpp"
 #include <iostream>
 
 int main()
 {
-    galfile::filesystem::path::Path path = "media/usb/././......./..././/.//././";
+    auto filesystem = galfile::filesystem::Filesystem();
+    auto *folder = filesystem.mkdirs("/media/linux/gamer");
 
-    std::cout << "Is path absolute: " << path.is_absolute() << std::endl;
-
-    path.to_parent();
-    path.to_parent();
-    path.to_parent();
-
-    path /= "linux/media/media/media./..";
-
-    for (const auto &item : path.join_path("gamer/cool/..").parts())
+    std::cout << folder << std::endl;
+    if (folder)
     {
-        std::cout << item << std::endl;
+        std::cout << folder->get_name() << std::endl;
+    }
+
+    folder = filesystem.cd("./media/linux");
+
+    std::cout << folder << std::endl;
+    if (folder)
+    {
+        std::cout << folder->get_name() << std::endl;
     }
 
     return 0;
