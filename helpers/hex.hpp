@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 
-namespace galfile::helpers
+namespace galfile::helper
 {
     inline std::string hex(uint64_t bytes)
     {

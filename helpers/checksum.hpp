@@ -4,7 +4,7 @@
 #include <openssl/sha.h>
 #include "hex.hpp"
 
-namespace galfile::helpers
+namespace galfile::helper
 {
     inline std::string checksum(const unsigned char *data, size_t size)
     {
@@ -15,7 +15,7 @@ namespace galfile::helpers
         std::string hash_string;
         for (uint64_t index = 0; index < sizeof(buffer); index++)
         {
-            hash_string += helpers::hex(buffer[index]);
+            hash_string += helper::hex(buffer[index]);
         }
 
         return hash_string;
