@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "folder_fwd.hpp"
 #include "../file/file.hpp"
 
 namespace galfile::filesystem::folder

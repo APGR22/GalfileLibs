@@ -11,20 +11,29 @@
 #include "../../io/object.hpp"
 #include "../../io/object/single_file.hpp"
 #include "../../type/int.hpp"
+#include "../folder/folder_fwd.hpp"
 
 namespace galfile::filesystem::file
 {
     class File
     {
         private:
+            folder::Folder *parent = nullptr;
             std::shared_ptr<io::Object> io_ptr;
             std::string name;
             std::filesystem::path filepath;
             bool auto_close = true;
 
         public:
-            File(std::shared_ptr<io::Object> &io_ptr, const std::string &name, const std::filesystem::path &filepath, bool auto_close)
+            File(
+                folder::Folder *parent,
+                std::shared_ptr<io::Object> &io_ptr,
+                const std::string &name,
+                const std::filesystem::path &filepath,
+                bool auto_close
+            )
             :
+                parent(parent),
                 io_ptr(io_ptr),
                 name(name),
                 filepath(filepath),
@@ -128,6 +137,11 @@ namespace galfile::filesystem::file
                 this->auto_close = value;
             }
 
+            void set_parent(folder::Folder *parent)
+            {
+                this->parent = parent;
+            }
+
             size_t get_size() const
             {
                 if (!this->io_ptr->is_opened()) return 0;
@@ -144,6 +158,11 @@ namespace galfile::filesystem::file
             const std::filesystem::path &get_filepath() const
             {
                 return this->filepath;
+            }
+
+            folder::Folder *get_parent() const
+            {
+                return this->parent;
             }
 
             bool is_opened() const
@@ -207,7 +226,7 @@ namespace galfile::filesystem::file
         std::shared_ptr<io::Object> io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return File(io_object, name, filepath, auto_close);
+        return File(nullptr, io_object, name, filepath, auto_close);
     }
 
     template<class T = io::object::SingleFile>
@@ -223,6 +242,8 @@ namespace galfile::filesystem::file
 
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return File(io_object, name, filepath, auto_close);
+        return File(nullptr, io_object, name, filepath, auto_close);
     }
 }
+
+#include "../folder/folder.hpp"
