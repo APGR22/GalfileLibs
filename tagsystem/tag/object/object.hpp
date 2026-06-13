@@ -3,6 +3,7 @@
 #include <list>
 #include <algorithm>
 #include <string>
+#include <memory>
 #include "../../../filesystem/file/file.hpp"
 
 namespace galfile::tagsystem::tag::object
@@ -10,11 +11,11 @@ namespace galfile::tagsystem::tag::object
     class Object
     {
         private:
-            filesystem::file::File *file;
+            std::shared_ptr<filesystem::file::File> file;
             std::list<std::string> tags;
 
         public:
-            Object(filesystem::file::File *file)
+            Object(const std::shared_ptr<filesystem::file::File> &file)
             : file(file)
             {}
 
@@ -27,7 +28,7 @@ namespace galfile::tagsystem::tag::object
                 return true;
             }
 
-            filesystem::file::File *get() const
+            const auto &get() const
             {
                 return this->file;
             }
@@ -73,7 +74,7 @@ namespace galfile::tagsystem::tag::object
 
             auto *operator->() const
             {
-                return this->file;
+                return this->file.get();
             }
 
             bool operator==(const filesystem::file::File &other_file) const
