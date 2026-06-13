@@ -1,0 +1,79 @@
+#pragma once
+
+#include <list>
+#include <algorithm>
+#include "../../../filesystem/file/file.hpp"
+
+namespace galfile::tagsystem::tag::object
+{
+    class Object
+    {
+        private:
+            filesystem::file::File *file;
+            std::list<std::string> tags;
+
+        public:
+            Object(filesystem::file::File *file)
+            : file(file)
+            {}
+
+            bool add_tag(const std::string &tag_name)
+            {
+                if (this->has_tag(tag_name)) return false;
+
+                this->tags.push_back(tag_name);
+
+                return true;
+            }
+
+            filesystem::file::File *get() const
+            {
+                return this->file;
+            }
+
+            const auto &get_tags() const
+            {
+                return this->tags;
+            }
+
+            bool remove_tag(const std::string &tag_name)
+            {
+                auto it = std::find(this->tags.begin(), this->tags.end(), tag_name);
+                if (it == this->tags.end()) return false;
+
+                this->tags.erase(it);
+
+                return true;
+            }
+
+            bool empty_tags()
+            {
+                return this->tags.empty();
+            }
+
+            bool has_tag(const std::string &tag_name) const
+            {
+                return std::find(this->tags.begin(), this->tags.end(), tag_name) != this->tags.end();
+            }
+
+            bool is_tags_empty() const
+            {
+                return this->tags.empty();
+            }
+
+            auto *operator->() const
+            {
+                return this->file;
+            }
+
+            bool operator==(const filesystem::file::File &other_file) const
+            {
+                return (*this->file) == other_file;
+            }
+
+            bool operator==(const Object &other) const
+            {
+                return (*this->file) == (*other.file);
+            }
+    };
+}
