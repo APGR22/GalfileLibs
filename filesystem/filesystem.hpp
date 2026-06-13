@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <string>
 #include <memory>
 #include "folder/folder.hpp"
 #include "path/path.hpp"
@@ -32,7 +33,11 @@ namespace galfile::filesystem
                 std::weak_ptr<folder::Folder> temp_ptr;
                 auto __shared_curdir_ptr = this->__curdir_ptr.lock();
                 // skip first element ["." or "/"]
-                for (auto it = ++path_parts.begin(); it != path_parts.end(); it++)
+                for (
+                    auto it = ++path_parts.begin();
+                    it != path_parts.end();
+                    it++
+                )
                 {
                     const std::string &pathname = *it;
 
@@ -61,7 +66,11 @@ namespace galfile::filesystem
 
                 const auto &path_parts = path.parts();
                 // skip first element ["." or "/"]
-                for (auto it = ++path_parts.begin(); it != path_parts.end(); it++)
+                for (
+                    auto it = ++path_parts.begin();
+                    it != path_parts.end();
+                    it++
+                )
                 {
                     const std::string &pathname = *it;
 

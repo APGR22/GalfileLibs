@@ -12,7 +12,10 @@ namespace galfile::io::object
             FILE *file = nullptr;
 
         public:
-            SingleFile(const std::filesystem::path &filepath) : io::Object(filepath)
+            SingleFile(
+                const std::filesystem::path &filepath
+            )
+            : io::Object(filepath)
             {}
 
             int fopen(io::IOMode mode)
@@ -20,10 +23,16 @@ namespace galfile::io::object
                 switch (mode)
                 {
                     case io::IOMode::NEW_EMPTY_AND_WRITE:
-                        this->file = ::fopen(this->_filepath.generic_string().c_str(), "w");
+                        this->file = ::fopen(
+                            this->_filepath.generic_string().c_str(),
+                            "w"
+                        );
                         break;
                     case io::IOMode::KEEP_EXISTING_AND_READ_WRITE:
-                        this->file = ::fopen(this->_filepath.generic_string().c_str(), "rb+");
+                        this->file = ::fopen(
+                            this->_filepath.generic_string().c_str(),
+                            "rb+"
+                        );
                         break;
                 }
 
@@ -47,7 +56,11 @@ namespace galfile::io::object
                 return ::fgetc(this->file);
             }
 
-            size_t fread(void *__restrict__ dst_buffer, size_t element_size, size_t count)
+            size_t fread(
+                void *__restrict__ dst_buffer,
+                size_t element_size,
+                size_t count
+            )
             {
                 return ::fread(dst_buffer, element_size, count, this->file);
             }
@@ -57,7 +70,11 @@ namespace galfile::io::object
                 return ::fputc(c, this->file);
             }
 
-            size_t fwrite(const void *__restrict__ data, size_t size, size_t count)
+            size_t fwrite(
+                const void *__restrict__ data,
+                size_t size,
+                size_t count
+            )
             {
                 return ::fwrite(data, size, count, this->file);
             }

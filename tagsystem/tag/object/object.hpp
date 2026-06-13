@@ -2,6 +2,7 @@
 
 #include <list>
 #include <algorithm>
+#include <string>
 #include "../../../filesystem/file/file.hpp"
 
 namespace galfile::tagsystem::tag::object
@@ -38,7 +39,11 @@ namespace galfile::tagsystem::tag::object
 
             bool remove_tag(const std::string &tag_name)
             {
-                auto it = std::find(this->tags.begin(), this->tags.end(), tag_name);
+                auto it = std::find(
+                    this->tags.begin(),
+                    this->tags.end(),
+                    tag_name
+                );
                 if (it == this->tags.end()) return false;
 
                 this->tags.erase(it);
@@ -53,7 +58,12 @@ namespace galfile::tagsystem::tag::object
 
             bool has_tag(const std::string &tag_name) const
             {
-                return std::find(this->tags.begin(), this->tags.end(), tag_name) != this->tags.end();
+                return std::find(
+                    this->tags.begin(),
+                    this->tags.end(),
+                    tag_name
+                )
+                != this->tags.end();
             }
 
             bool is_tags_empty() const

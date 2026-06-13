@@ -22,7 +22,10 @@ namespace galfile::filesystem::path
                 }
             }
 
-            void _str_path_to_list_path(const std::string &str_path, std::list<std::string> &list_path) const
+            void _str_path_to_list_path(
+                const std::string &str_path,
+                std::list<std::string> &list_path
+            ) const
             {
                 helper::split_string_by(list_path, str_path, '/');
 
@@ -146,7 +149,11 @@ namespace galfile::filesystem::path
                     this->paths.clear();
                 }
 
-                this->paths.insert(this->paths.end(), ++path.paths.begin(), path.paths.end());
+                this->paths.insert(
+                    this->paths.end(),
+                    ++path.paths.begin(),
+                    path.paths.end()
+                );
 
                 this->_resolve_levels(this->paths);
             }

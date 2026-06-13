@@ -1,11 +1,14 @@
-#include "../filesystem/filesystem.hpp"
-#include "../tagsystem/tagsystem.hpp"
 #include <memory>
 #include <iostream>
+#include "../filesystem/filesystem.hpp"
+#include "../tagsystem/tagsystem.hpp"
 
 int main()
 {
-    auto file = galfile::filesystem::file::create_new("test/example/test.txt", "custom");
+    auto file = galfile::filesystem::file::create_new(
+        "test/example/test.txt",
+        "custom"
+    );
     auto filesystem = galfile::filesystem::Filesystem();
 
     std::weak_ptr<galfile::filesystem::folder::Folder> parent_folder_ptr;
@@ -31,7 +34,10 @@ int main()
     if (!parent_folder_ptr.expired())
     {
         auto shared_parent_folder_ptr = parent_folder_ptr.lock();
-        std::cout << "Parent: " << shared_parent_folder_ptr->get_name() << std::endl;
+        std::cout
+        << "Parent: "
+        << shared_parent_folder_ptr->get_name()
+        << std::endl;
     }
 
     return 0;

@@ -29,10 +29,20 @@ namespace galfile::tagsystem
                 return true;
             }
 
-            bool add_object_at_tag(const std::string &tag_name, const std::shared_ptr<tag::object::Object> &object)
+            bool add_object_at_tag(
+                const std::string &tag_name,
+                const std::shared_ptr<tag::object::Object> &object
+            )
             {
                 auto &list_objects = this->objects[tag_name];
-                if (std::find(list_objects.begin(), list_objects.end(), object) != list_objects.end())
+                if (
+                    std::find(
+                        list_objects.begin(),
+                        list_objects.end(),
+                        object
+                    )
+                    != list_objects.end()
+                )
                 {
                     return false;
                 }
@@ -55,7 +65,10 @@ namespace galfile::tagsystem
                 return list_tags;
             }
 
-            bool get_objects_at_tag(const std::string &tag_name, std::list<std::shared_ptr<tag::object::Object>> &dst_list) const
+            bool get_objects_at_tag(
+                const std::string &tag_name,
+                std::list<std::shared_ptr<tag::object::Object>> &dst_list
+            ) const
             {
                 if (!this->has_tag(tag_name)) return false;
 
@@ -80,13 +93,20 @@ namespace galfile::tagsystem
                 return true;
             }
 
-            bool remove_object_at_tag(const std::string &tag_name, const std::shared_ptr<tag::object::Object> &object)
+            bool remove_object_at_tag(
+                const std::string &tag_name,
+                const std::shared_ptr<tag::object::Object> &object
+            )
             {
                 auto tag_it = this->objects.find(tag_name);
                 if (tag_it == this->objects.end()) return false;
 
                 auto &list_objects = tag_it->second;
-                auto object_it = std::find(list_objects.begin(), list_objects.end(), object);
+                auto object_it = std::find(
+                    list_objects.begin(),
+                    list_objects.end(),
+                    object
+                );
                 if (object_it == list_objects.end()) return false;
 
                 auto __object = object_it->get();
@@ -102,14 +122,22 @@ namespace galfile::tagsystem
                 return this->objects.contains(tag_name);
             }
 
-            bool has_object_at_tag(const std::string &tag_name, const std::shared_ptr<tag::object::Object> &object) const
+            bool has_object_at_tag(
+                const std::string &tag_name,
+                const std::shared_ptr<tag::object::Object> &object
+            ) const
             {
                 auto tag_it = this->objects.find(tag_name);
                 if (tag_it == this->objects.end()) return false;
 
                 auto &list_objects = tag_it->second;
 
-                return std::find(list_objects.begin(), list_objects.end(), object) != list_objects.end();
+                return std::find(
+                    list_objects.begin(),
+                    list_objects.end(),
+                    object
+                )
+                != list_objects.end();
             }
     };
 }

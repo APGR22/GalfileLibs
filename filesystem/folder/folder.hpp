@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <utility>
 #include "folder_fwd.hpp"
 #include "../file/file.hpp"
 
@@ -14,8 +15,14 @@ namespace galfile::filesystem::folder
         private:
             std::weak_ptr<Folder> __parent;
             std::string __name;
-            std::unordered_map<std::string, std::shared_ptr<file::File>> __files;
-            std::unordered_map<std::string, std::shared_ptr<Folder>> __folders;
+            std::unordered_map<
+                std::string,
+                std::shared_ptr<file::File>
+            > __files;
+            std::unordered_map<
+                std::string,
+                std::shared_ptr<Folder>
+            > __folders;
 
             bool __auto_close_files = false;
 
@@ -54,7 +61,9 @@ namespace galfile::filesystem::folder
                 other.__folders.clear();
             }
 
-            std::weak_ptr<file::File> append_file(const std::shared_ptr<file::File> &file)
+            std::weak_ptr<file::File> append_file(
+                const std::shared_ptr<file::File> &file
+            )
             {
                 if (this->__files.contains(file->get_name())) return {};
                 if (this->__folders.contains(file->get_name())) return {};
@@ -65,7 +74,9 @@ namespace galfile::filesystem::folder
                 return item;
             }
 
-            std::weak_ptr<Folder> append_folder(const std::shared_ptr<Folder> &folder)
+            std::weak_ptr<Folder> append_folder(
+                const std::shared_ptr<Folder> &folder
+            )
             {
                 if (this == folder.get()) return {};
                 if (this->__folders.contains(folder->__name)) return {};
@@ -127,7 +138,8 @@ namespace galfile::filesystem::folder
             {
                 if (!this->__files.contains(name)) return false;
 
-                this->__files.at(name)->set_auto_close(this->__auto_close_files);
+                this->__files.at(name)
+                    ->set_auto_close(this->__auto_close_files);
                 this->__files.erase(name);
 
                 return true;
@@ -229,6 +241,7 @@ namespace galfile::filesystem::folder
             parent,
             name,
             auto_close_files
-        ));
+            )
+        );
     }
 }

@@ -5,7 +5,12 @@
 
 namespace galfile::helper
 {
-    void split_string_by(std::list<std::string> &dst_splits, const std::string &str, char by_c, bool include_empty = false)
+    void split_string_by(
+        std::list<std::string> &dst_splits,
+        const std::string &str,
+        char by_c,
+        bool include_empty = false
+    )
     {
         dst_splits.clear();
 
