@@ -27,7 +27,7 @@ namespace galfile::filesystem::file
         public:
             File(
                 std::weak_ptr<folder::Folder> parent,
-                std::shared_ptr<io::Object> &io_ptr,
+                const std::shared_ptr<io::Object> &io_ptr,
                 const std::string &name,
                 const std::filesystem::path &filepath,
                 bool auto_close
@@ -270,13 +270,13 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         return std::make_shared<File>(
-            {
+            File(
                 {},
                 io_object,
                 name,
                 filepath,
                 auto_close
-            }
+            )
         );
     }
 
@@ -301,13 +301,13 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         return std::make_shared<File>(
-            {
+            File(
                 {},
                 io_object,
                 name,
                 filepath,
                 auto_close
-            }
+            )
         );
     }
 }
