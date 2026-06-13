@@ -12,12 +12,12 @@ namespace galfile::filesystem::folder
     class Folder : protected std::enable_shared_from_this<Folder>
     {
         private:
-            std::weak_ptr<Folder> parent;
-            std::string name;
-            std::unordered_map<std::string, std::shared_ptr<file::File>> files;
-            std::unordered_map<std::string, std::shared_ptr<Folder>> folders;
+            std::weak_ptr<Folder> __parent;
+            std::string __name;
+            std::unordered_map<std::string, std::shared_ptr<file::File>> __files;
+            std::unordered_map<std::string, std::shared_ptr<Folder>> __folders;
 
-            bool auto_close_files = false;
+            bool __auto_close_files = false;
 
         public:
             Folder(
@@ -26,40 +26,40 @@ namespace galfile::filesystem::folder
                 bool auto_close_files
             )
             :
-                parent(parent),
-                name(name),
-                auto_close_files(auto_close_files)
+                __parent(parent),
+                __name(name),
+                __auto_close_files(auto_close_files)
             {}
 
             Folder(const Folder &other)
             :
-                parent(other.parent),
-                name(other.name),
-                files(other.files),
-                folders(other.folders),
-                auto_close_files(other.auto_close_files)
+                __parent(other.__parent),
+                __name(other.__name),
+                __files(other.__files),
+                __folders(other.__folders),
+                __auto_close_files(other.__auto_close_files)
             {}
 
             Folder(Folder &&other)
             :
-                parent(other.parent),
-                name(other.name),
-                files(std::move(other.files)),
-                folders(std::move(other.folders)),
-                auto_close_files(other.auto_close_files)
+                __parent(other.__parent),
+                __name(other.__name),
+                __files(std::move(other.__files)),
+                __folders(std::move(other.__folders)),
+                __auto_close_files(other.__auto_close_files)
             {
-                other.parent.reset();
-                other.name.clear();
-                other.files.clear();
-                other.folders.clear();
+                other.__parent.reset();
+                other.__name.clear();
+                other.__files.clear();
+                other.__folders.clear();
             }
 
             std::weak_ptr<file::File> append_file(const std::shared_ptr<file::File> &file)
             {
-                if (this->files.contains(file->get_name())) return {};
-                if (this->folders.contains(file->get_name())) return {};
+                if (this->__files.contains(file->get_name())) return {};
+                if (this->__folders.contains(file->get_name())) return {};
 
-                auto pair = this->files.insert({file->get_name(), file});
+                auto pair = this->__files.insert({file->get_name(), file});
                 auto &item = pair.first->second;
 
                 return item;
@@ -68,112 +68,122 @@ namespace galfile::filesystem::folder
             std::weak_ptr<Folder> append_folder(const std::shared_ptr<Folder> &folder)
             {
                 if (this == folder.get()) return {};
-                if (this->folders.contains(folder->name)) return {};
-                if (this->files.contains(folder->name)) return {};
+                if (this->__folders.contains(folder->__name)) return {};
+                if (this->__files.contains(folder->__name)) return {};
 
-                auto pair = this->folders.insert({folder->name, folder});
+                auto pair = this->__folders.insert({folder->__name, folder});
                 auto &item = pair.first->second;
-                item->parent = this->weak_from_this();
+                item->__parent = this->weak_from_this();
 
                 return item;
             }
 
+            void set_parent(const std::weak_ptr<Folder> &parent)
+            {
+                this->__parent = parent;
+            }
+
+            const auto &get_parent() const
+            {
+                return this->__parent;
+            }
+
             const std::string &get_name() const
             {
-                return this->name;
+                return this->__name;
             }
 
             std::weak_ptr<file::File> get_file(const std::string &name)
             {
-                if (!this->files.contains(name))
+                if (!this->__files.contains(name))
                 {
                     return {};
                 }
 
-                return this->files.at(name);
+                return this->__files.at(name);
             }
 
             std::weak_ptr<Folder> get_folder(const std::string &name)
             {
-                if (!this->folders.contains(name))
+                if (!this->__folders.contains(name))
                 {
                     return {};
                 }
 
-                return this->folders.at(name);
+                return this->__folders.at(name);
             }
 
             const auto &get_all_files() const
             {
-                return this->files;
+                return this->__files;
             }
 
             const auto &get_all_folders() const
             {
-                return this->folders;
+                return this->__folders;
             }
 
             bool remove_file(const std::string &name)
             {
-                if (!this->files.contains(name)) return false;
+                if (!this->__files.contains(name)) return false;
 
-                this->files.at(name)->set_auto_close(this->auto_close_files);
-                this->files.erase(name);
+                this->__files.at(name)->set_auto_close(this->__auto_close_files);
+                this->__files.erase(name);
 
                 return true;
             }
 
             bool remove_folder(const std::string &name)
             {
-                if (!this->folders.contains(name)) return false;
+                if (!this->__folders.contains(name)) return false;
 
-                this->folders.at(name)->parent.reset();
-                this->folders.erase(name);
+                this->__folders.at(name)->__parent.reset();
+                this->__folders.erase(name);
 
                 return true;
             }
 
             void clear()
             {
-                for (auto &it : this->files)
+                for (auto &it : this->__files)
                 {
                     auto &file = it.second;
-                    file->set_auto_close(this->auto_close_files);
+                    file->set_auto_close(this->__auto_close_files);
                 }
 
-                this->files.clear();
-                this->folders.clear();
+                this->__files.clear();
+                this->__folders.clear();
             }
 
             void set_auto_close_files(bool value)
             {
-                this->auto_close_files = value;
+                this->__auto_close_files = value;
             }
 
             bool is_file_exists(const std::string &name) const
             {
-                return this->files.contains(name);
+                return this->__files.contains(name);
             }
 
             bool is_folder_exists(const std::string &name) const
             {
-                return this->folders.contains(name);
+                return this->__folders.contains(name);
             }
 
             bool is_empty() const noexcept
             {
-                return this->files.empty() && this->folders.empty();
+                return this->__files.empty() && this->__folders.empty();
             }
 
             Folder &operator=(const Folder &other)
             {
                 if (this != &other)
                 {
-                    this->parent = other.parent;
-                    this->name = other.name;
-                    this->files = other.files;
-                    this->folders = other.folders;
-                    this->auto_close_files = other.auto_close_files;
+                    this->__parent = other.__parent;
+                    this->__name = other.__name;
+                    this->__files = other.__files;
+                    this->__folders = other.__folders;
+                    this->__auto_close_files = other.__auto_close_files;
                 }
 
                 return *this;
@@ -183,16 +193,16 @@ namespace galfile::filesystem::folder
             {
                 if (this != &other)
                 {
-                    this->parent = other.parent;
-                    this->name = other.name;
-                    this->files = std::move(other.files);
-                    this->folders = std::move(other.folders);
-                    this->auto_close_files = other.auto_close_files;
+                    this->__parent = other.__parent;
+                    this->__name = other.__name;
+                    this->__files = std::move(other.__files);
+                    this->__folders = std::move(other.__folders);
+                    this->__auto_close_files = other.__auto_close_files;
 
-                    other.parent.reset();
-                    other.name.clear();
-                    other.files.clear();
-                    other.folders.clear();
+                    other.__parent.reset();
+                    other.__name.clear();
+                    other.__files.clear();
+                    other.__folders.clear();
                 }
 
                 return *this;
@@ -200,8 +210,10 @@ namespace galfile::filesystem::folder
 
             ~Folder()
             {
-                this->parent.reset();
-                this->name.clear();
+                this->__parent.reset();
+                this->__name.clear();
+                this->__files.clear();
+                this->__folders.clear();
 
                 this->clear();
             }
