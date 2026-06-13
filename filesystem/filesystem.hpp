@@ -14,6 +14,43 @@ namespace galfile::filesystem
             std::shared_ptr<folder::Folder> __root;
             std::weak_ptr<folder::Folder> __curdir_ptr;
 
+        protected:
+            std::weak_ptr<folder::Folder> _go_to_folder(
+                const path::Path &path
+            )
+            {
+                std::weak_ptr<folder::Folder> curdir_ptr;
+                if (path.is_absolute())
+                {
+                    curdir_ptr = this->__root;
+                }
+                else
+                {
+                    curdir_ptr = this->__curdir_ptr;
+                }
+
+                const auto &path_parts = path.parts();
+                std::weak_ptr<folder::Folder> temp_ptr;
+                // skip first element ["." or "/"]
+                for (
+                    auto it = ++path_parts.begin();
+                    it != path_parts.end();
+                    it++
+                )
+                {
+                    const std::string &path_name = *it;
+
+                    auto shared_curdir_ptr = curdir_ptr.lock();
+
+                    temp_ptr = shared_curdir_ptr->get_folder(path_name);
+                    if (temp_ptr.expired()) return {};
+
+                    curdir_ptr = temp_ptr;
+                }
+
+                return curdir_ptr;
+            }
+
         public:
             Filesystem()
             :
@@ -52,7 +89,6 @@ namespace galfile::filesystem
 
             std::weak_ptr<folder::Folder> mkdirs(const path::Path &path)
             {
-                auto __shared_curdir_ptr = this->__curdir_ptr.lock();
                 std::weak_ptr<folder::Folder> curdir_ptr;
                 if (path.is_absolute())
                 {
@@ -60,7 +96,7 @@ namespace galfile::filesystem
                 }
                 else
                 {
-                    curdir_ptr = __shared_curdir_ptr;
+                    curdir_ptr = this->__curdir_ptr;
                 }
                 auto prevdir_ptr = curdir_ptr;
 
@@ -88,6 +124,26 @@ namespace galfile::filesystem
                 }
 
                 return curdir_ptr;
+            }
+
+            bool rmdirs(const path::Path &path)
+            {
+                auto folder_ptr = this->_go_to_folder(path);
+                if (folder_ptr.expired()) return false;
+
+                auto shared_folder_ptr = folder_ptr.lock();
+                if (shared_folder_ptr.get() == this->__root.get())
+                {
+                    this->__root->clear();
+                    return true;
+                }
+
+                auto parent_folder_ptr = shared_folder_ptr->get_parent();
+                auto shared_parent_folder_ptr = parent_folder_ptr.lock();
+
+                return shared_parent_folder_ptr->remove_folder(
+                    shared_folder_ptr->get_name()
+                );
             }
     };
 }

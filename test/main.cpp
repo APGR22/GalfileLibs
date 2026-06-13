@@ -40,5 +40,17 @@ int main()
         << std::endl;
     }
 
+    filesystem.rmdirs("/media/linux");
+    if (!folder_ptr.expired())
+    {
+        std::cout << "Success to keep alive from rmdirs" << std::endl;
+    }
+
+    filesystem.rmdirs("/");
+    if (folder_ptr.expired())
+    {
+        std::cout << "Success to remove from root" << std::endl;
+    }
+
     return 0;
 }
