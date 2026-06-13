@@ -18,7 +18,7 @@ namespace galfile::filesystem::file
     class File
     {
         private:
-            folder::Folder *parent = nullptr;
+            std::weak_ptr<folder::Folder> parent;
             std::shared_ptr<io::Object> io_ptr;
             std::string name;
             std::filesystem::path filepath;
@@ -26,7 +26,7 @@ namespace galfile::filesystem::file
 
         public:
             File(
-                folder::Folder *parent,
+                std::weak_ptr<folder::Folder> parent,
                 std::shared_ptr<io::Object> &io_ptr,
                 const std::string &name,
                 const std::filesystem::path &filepath,
@@ -137,7 +137,7 @@ namespace galfile::filesystem::file
                 this->auto_close = value;
             }
 
-            void set_parent(folder::Folder *parent)
+            void set_parent(const std::weak_ptr<folder::Folder> &parent)
             {
                 this->parent = parent;
             }
@@ -160,7 +160,7 @@ namespace galfile::filesystem::file
                 return this->filepath;
             }
 
-            folder::Folder *get_parent() const
+            const std::weak_ptr<folder::Folder> &get_parent() const
             {
                 return this->parent;
             }
@@ -220,17 +220,17 @@ namespace galfile::filesystem::file
     };
 
     template<class T = io::object::SingleFile>
-    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, File>
+    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, std::shared_ptr<File>>
         open_existing(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
         std::shared_ptr<io::Object> io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return File(nullptr, io_object, name, filepath, auto_close);
+        return std::make_shared<File>(File({}, io_object, name, filepath, auto_close));
     }
 
     template<class T = io::object::SingleFile>
-    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, File>
+    typename std::enable_if_t<std::is_base_of_v<io::Object, T>, std::shared_ptr<File>>
         create_new(const std::filesystem::path &filepath, const std::string &name, bool auto_close = true)
     {
         std::shared_ptr<io::Object> io_object = std::make_shared<T>(T(filepath));
@@ -242,7 +242,7 @@ namespace galfile::filesystem::file
 
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return File(nullptr, io_object, name, filepath, auto_close);
+        return std::make_shared<File>(File({}, io_object, name, filepath, auto_close));
     }
 }
 

@@ -6,22 +6,21 @@
 int main()
 {
     auto file = galfile::filesystem::file::create_new("test/example/test.txt", "custom");
-    auto tag_object = std::make_shared<galfile::tagsystem::tag::object::Object>(&file);
-    galfile::tagsystem::TagSystem tagsystem;
+    auto filesystem = galfile::filesystem::Filesystem();
 
-    tagsystem.add_object_at_tag("testing", tag_object);
+    auto folder_ptr = filesystem.mkdirs("/media/linux/game");
+    if (!folder_ptr.expired())
+    {
+        auto shared_folder_ptr = folder_ptr.lock();
+        std::cout << shared_folder_ptr->get_name() << std::endl;
+    }
 
-    std::cout << (*tag_object)->get_name() << std::endl;
-    std::cout
-    << "Is object present in tag \"testing\": "
-    << tagsystem.has_object_at_tag("testing", tag_object)
-    << std::endl
-    ;
-    std::cout
-    << "Is tag saved to the object: "
-    << tag_object->has_tag("testing")
-    << std::endl
-    ;
+    folder_ptr = filesystem.cd("media");
+    if (!folder_ptr.expired())
+    {
+        auto shared_folder_ptr = folder_ptr.lock();
+        std::cout << shared_folder_ptr->get_name() << std::endl;
+    }
 
     return 0;
 }
