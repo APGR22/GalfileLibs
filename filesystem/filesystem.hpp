@@ -126,6 +126,30 @@ namespace galfile::filesystem
                 return curdir_ptr;
             }
 
+            std::weak_ptr<file::File> mkfile(
+                const path::Path &directory_path,
+                const std::string &filename,
+                const std::filesystem::path &physical_filepath
+            )
+            {
+                auto folder_ptr = this->_go_to_folder(directory_path);
+                if (folder_ptr.expired()) return {};
+
+                auto shared_folder_ptr = folder_ptr.lock();
+                if (shared_folder_ptr->is_file_exists(filename))
+                {
+                    return {};
+                }
+
+                return shared_folder_ptr->append_file(
+                    file::create_new(
+                        physical_filepath,
+                        filename,
+                        true
+                    )
+                );
+            }
+
             bool rmdirs(const path::Path &path)
             {
                 auto folder_ptr = this->_go_to_folder(path);
