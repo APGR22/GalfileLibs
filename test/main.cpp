@@ -21,20 +21,28 @@ int main()
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
-    auto cp_folder_ptr = filesystem.cpdir("/media/linux/game", "/");
-    if (auto shared_cp_folder_ptr = cp_folder_ptr.lock())
+    auto mv_folder_ptr = filesystem.mvdir("/media/linux/game", "/");
+    if (auto shared_mv_folder_ptr = mv_folder_ptr.lock())
     {
         std::cout
-        << "Success to copy dir: "
-        << shared_cp_folder_ptr->get_name()
+        << "Success to move dir: "
+        << shared_mv_folder_ptr->get_name()
         << std::endl;
-
-        parent_folder_ptr = shared_cp_folder_ptr->get_parent();
     }
 
     std::cout
     << "Is dir \"/game\" exists: "
     << filesystem.isdir("/game")
+    << std::endl;
+
+    std::cout
+    << "Is dir \"/media/linux/game\" exists: "
+    << filesystem.isdir("/media/linux/game")
+    << std::endl;
+
+    std::cout
+    << "Is old folder_ptr still exists: "
+    << !folder_ptr.expired()
     << std::endl;
 
     return 0;

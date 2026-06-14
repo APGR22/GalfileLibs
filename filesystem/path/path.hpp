@@ -226,5 +226,12 @@ namespace galfile::filesystem::path
             {
                 return this->join_path(path);
             }
+
+            bool operator==(const Path &other) const
+            {
+                if (this == &other) return true;
+
+                return this->paths == other.paths;
+            }
     };
 }

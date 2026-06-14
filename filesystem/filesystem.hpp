@@ -204,6 +204,40 @@ namespace galfile::filesystem
                 );
             }
 
+            std::weak_ptr<folder::Folder> mvdir(
+                const path::Path &src_path,
+                const path::Path &dst_parent_path
+            )
+            {
+                if (src_path == "/") return {};
+
+                auto src_parent_path = src_path.parent();
+
+                auto src_folder_ptr = this->_go_to_folder(src_path);
+                auto src_parent_folder_ptr = this->_go_to_folder(src_parent_path);
+                auto dst_parent_folder_ptr = this->_go_to_folder(dst_parent_path);
+
+                auto shared_src_folder_ptr = src_folder_ptr.lock();
+                auto shared_src_parent_folder_ptr = src_parent_folder_ptr.lock();
+                auto shared_dst_parent_folder_ptr = dst_parent_folder_ptr.lock();
+
+                if (!shared_src_folder_ptr) return {};
+                if (!shared_src_parent_folder_ptr) return {};
+                if (!shared_dst_parent_folder_ptr) return {};
+
+                auto mv_ret = shared_dst_parent_folder_ptr->append_folder(
+                    shared_src_folder_ptr
+                );
+                if (mv_ret.expired()) return {};
+
+                auto rm_ret = shared_src_parent_folder_ptr->remove_folder(
+                    shared_src_folder_ptr->get_name()
+                );
+                if (!rm_ret) return {};
+
+                return mv_ret;
+            }
+
             bool isdir(const path::Path &path) const
             {
                 auto temp_ptr = this->_go_to_folder(path);
