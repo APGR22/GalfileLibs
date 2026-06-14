@@ -37,4 +37,21 @@ namespace galfile::helper
             substr.clear();
         }
     }
+
+    std::string merge_list_string_with_separator(
+        const std::list<std::string> &list_string,
+        char c_sep
+    )
+    {
+        std::string str;
+
+        for (const auto &substr : list_string)
+        {
+            str += substr + c_sep;
+        }
+
+        if (!str.empty()) str.pop_back();
+
+        return str;
+    }
 }

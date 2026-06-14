@@ -187,6 +187,14 @@ namespace galfile::filesystem::path
                 return this->paths.back();
             }
 
+            std::string general_string() const
+            {
+                return helper::merge_list_string_with_separator(
+                    this->paths,
+                    '/'
+                );
+            }
+
             bool is_absolute() const
             {
                 return this->paths.front() == "/";
