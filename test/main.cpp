@@ -30,29 +30,7 @@ int main()
         << std::endl;
     }
 
-    auto mv_file_ptr = filesystem.mvfile("/media/file.txt", "/");
-    if (auto shared_mv_file_ptr = mv_file_ptr.lock())
-    {
-        std::cout
-        << "Success to move a file: "
-        << shared_mv_file_ptr->get_name()
-        << std::endl;
-    }
-
-    std::cout
-    << "Is \"/media/file.txt\" file exists: "
-    << filesystem.isfile("/media/file.txt")
-    << std::endl;
-
-    std::cout
-    << "Is \"/file.txt\" file exists: "
-    << filesystem.isfile("/file.txt")
-    << std::endl;
-
-    std::cout
-    << "Is old file_ptr still exists: "
-    << !file_ptr.expired()
-    << std::endl;
+    filesystem.tree__expensive();
 
     return 0;
 }
