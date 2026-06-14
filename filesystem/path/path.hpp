@@ -182,6 +182,11 @@ namespace galfile::filesystem::path
                 return this->paths;
             }
 
+            const std::string &name() const
+            {
+                return this->paths.back();
+            }
+
             bool is_absolute() const
             {
                 return this->paths.front() == "/";

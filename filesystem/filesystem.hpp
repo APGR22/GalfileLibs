@@ -110,11 +110,13 @@ namespace galfile::filesystem
             }
 
             std::weak_ptr<file::File> mkfile(
-                const path::Path &directory_path,
-                const std::string &filename,
+                const path::Path &filepath,
                 const std::filesystem::path &physical_filepath
             )
             {
+                auto directory_path = filepath.parent();
+                auto filename = filepath.name();
+
                 auto folder_ptr = this->_go_to_folder(directory_path);
                 auto shared_folder_ptr = folder_ptr.lock();
                 if (!shared_folder_ptr) return {};
@@ -148,6 +150,20 @@ namespace galfile::filesystem
                 return shared_parent_folder_ptr->remove_folder(
                     shared_folder_ptr->get_name()
                 );
+            }
+
+            bool rmfile(const path::Path &filepath)
+            {
+                auto directory_path = filepath.parent();
+                auto filename = filepath.name();
+
+                auto folder_ptr = this->_go_to_folder(directory_path);
+                auto shared_folder_ptr = folder_ptr.lock();
+                if (!shared_folder_ptr) return false;
+
+                if (!shared_folder_ptr->is_file_exists(filename)) return false;
+
+                return shared_folder_ptr->remove_file(filename);
             }
     };
 }

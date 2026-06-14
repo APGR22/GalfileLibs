@@ -49,13 +49,19 @@ int main()
         std::cout << "Success to remove from root" << std::endl;
     }
 
-    auto file_ptr = filesystem.mkfile("/", "fileeee", "test/example/test.txt");
+    auto file_ptr = filesystem.mkfile("/fileeee", "test/example/test.txt");
     if (auto shared_file_ptr = file_ptr.lock())
     {
         std::cout
         << "Success to create a file: "
         << shared_file_ptr->get_name()
         << std::endl;
+    }
+
+    filesystem.rmfile("/fileeee");
+    if (file_ptr.expired())
+    {
+        std::cout << "Success to remove a file" << std::endl;
     }
 
     return 0;
