@@ -269,6 +269,41 @@ namespace galfile::filesystem
                 return mv_ret;
             }
 
+            std::weak_ptr<file::File> mvfile(
+                const path::Path &src_filepath,
+                const path::Path &dst_parent_filepath
+            )
+            {
+                if (src_filepath == "/") return {};
+
+                auto filename = src_filepath.name();
+
+                auto src_parent_filepath = src_filepath.parent();
+
+                auto src_parent_filepath_ptr = this->_go_to_folder(src_parent_filepath);
+                auto dst_parent_filepath_ptr = this->_go_to_folder(dst_parent_filepath);
+
+                auto shared_src_parent_filepath_ptr = src_parent_filepath_ptr.lock();
+                auto shared_dst_parent_filepath_ptr = dst_parent_filepath_ptr.lock();
+
+                if (!shared_src_parent_filepath_ptr) return {};
+                if (!shared_dst_parent_filepath_ptr) return {};
+
+                auto src_file_ptr = shared_src_parent_filepath_ptr->get_file(filename);
+                auto shared_src_file_ptr = src_file_ptr.lock();
+                if (!shared_src_file_ptr) return {};
+
+                auto mv_ret = shared_dst_parent_filepath_ptr->append_file(
+                    shared_src_file_ptr
+                );
+                if (mv_ret.expired()) return {};
+
+                auto rm_ret = shared_src_parent_filepath_ptr->remove_file(filename);
+                if (!rm_ret) return {};
+
+                return mv_ret;
+            }
+
             bool isdir(const path::Path &path) const
             {
                 auto temp_ptr = this->_go_to_folder(path);

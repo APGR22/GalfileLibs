@@ -30,12 +30,12 @@ int main()
         << std::endl;
     }
 
-    auto cp_file_ptr = filesystem.cpfile("/media/file.txt", "/");
-    if (auto shared_cp_file_ptr = cp_file_ptr.lock())
+    auto mv_file_ptr = filesystem.mvfile("/media/file.txt", "/");
+    if (auto shared_mv_file_ptr = mv_file_ptr.lock())
     {
         std::cout
-        << "Success to create a file: "
-        << shared_cp_file_ptr->get_name()
+        << "Success to move a file: "
+        << shared_mv_file_ptr->get_name()
         << std::endl;
     }
 
@@ -47,6 +47,11 @@ int main()
     std::cout
     << "Is \"/file.txt\" file exists: "
     << filesystem.isfile("/file.txt")
+    << std::endl;
+
+    std::cout
+    << "Is old file_ptr still exists: "
+    << !file_ptr.expired()
     << std::endl;
 
     return 0;
