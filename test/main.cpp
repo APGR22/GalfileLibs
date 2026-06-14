@@ -69,5 +69,10 @@ int main()
     << file_ptr.expired()
     << std::endl;
 
+    std::cout
+    << "Is path \"/\" exists: "
+    << filesystem.isexists("/")
+    << std::endl;
+
     return 0;
 }

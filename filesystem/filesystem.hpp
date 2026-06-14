@@ -189,7 +189,7 @@ namespace galfile::filesystem
                 return !temp_ptr.expired();
             }
 
-            bool isfile(const path::Path &filepath)
+            bool isfile(const path::Path &filepath) const
             {
                 auto directory_path = filepath.parent();
                 auto filename = filepath.name();
@@ -199,6 +199,14 @@ namespace galfile::filesystem
                 if (!shared_directory_ptr) return false;
 
                 return shared_directory_ptr->is_file_exists(filename);
+            }
+
+            bool isexists(const path::Path &path) const
+            {
+                if (this->isdir(path)) return true;
+                if (this->isfile(path)) return true;
+
+                return false;
             }
     };
 }
