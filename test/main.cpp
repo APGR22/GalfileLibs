@@ -29,40 +29,18 @@ int main()
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
-    if (auto shared_parent_folder_ptr = parent_folder_ptr.lock())
-    {
-        std::cout
-        << "Parent: "
-        << shared_parent_folder_ptr->get_name()
-        << std::endl;
-    }
-
     filesystem.rmdirs("/media/linux");
-    if (!folder_ptr.expired())
-    {
-        std::cout << "Success to keep alive from rmdirs" << std::endl;
-    }
+
+    std::cout << filesystem.pwd() << std::endl;
 
     filesystem.rmdirs("/");
-    if (folder_ptr.expired())
-    {
-        std::cout << "Success to remove from root" << std::endl;
-    }
 
-    auto file_ptr = filesystem.mkfile("/fileeee", "test/example/test.txt");
-    if (auto shared_file_ptr = file_ptr.lock())
-    {
-        std::cout
-        << "Success to create a file: "
-        << shared_file_ptr->get_name()
-        << std::endl;
-    }
+    std::cout << filesystem.pwd() << std::endl;
 
-    filesystem.rmfile("/fileeee");
-    if (file_ptr.expired())
-    {
-        std::cout << "Success to remove a file" << std::endl;
-    }
+    std::cout
+    << "Is dir \"/media/linux\" exists: "
+    << filesystem.isdir("/media/linux")
+    << std::endl;
 
     return 0;
 }

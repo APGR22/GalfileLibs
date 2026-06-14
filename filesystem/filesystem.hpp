@@ -13,11 +13,12 @@ namespace galfile::filesystem
         private:
             std::shared_ptr<folder::Folder> __root;
             std::weak_ptr<folder::Folder> __curdir_ptr;
+            path::Path __curdir_path;
 
         protected:
             std::weak_ptr<folder::Folder> _go_to_folder(
                 const path::Path &path
-            )
+            ) const
             {
                 std::weak_ptr<folder::Folder> curdir_ptr;
                 if (path.is_absolute())
@@ -57,7 +58,8 @@ namespace galfile::filesystem
             Filesystem()
             :
                 __root(folder::create_new("/")),
-                __curdir_ptr(this->__root)
+                __curdir_ptr(this->__root),
+                __curdir_path("/")
             {}
 
             std::weak_ptr<folder::Folder> cd(const path::Path &path)
@@ -66,12 +68,15 @@ namespace galfile::filesystem
                 if (temp_curdir_ptr.expired()) return {};
 
                 this->__curdir_ptr = temp_curdir_ptr;
+
+                this->__curdir_path /= path;
+
                 return this->__curdir_ptr;
             }
 
-            std::weak_ptr<folder::Folder> pwd() const
+            std::string pwd() const
             {
-                return this->__curdir_ptr;
+                return this->__curdir_path.general_string();
             }
 
             std::weak_ptr<folder::Folder> mkdirs(const path::Path &path)
@@ -146,11 +151,18 @@ namespace galfile::filesystem
                 if (shared_folder_ptr.get() == this->__root.get())
                 {
                     this->__root->clear();
+
+                    this->__curdir_ptr = this->__root;
+                    this->__curdir_path = "/";
+
                     return true;
                 }
 
                 auto parent_folder_ptr = shared_folder_ptr->get_parent();
                 auto shared_parent_folder_ptr = parent_folder_ptr.lock();
+
+                this->__curdir_ptr = parent_folder_ptr;
+                this->__curdir_path = path.parent();
 
                 return shared_parent_folder_ptr->remove_folder(
                     shared_folder_ptr->get_name()
@@ -169,6 +181,12 @@ namespace galfile::filesystem
                 if (!shared_folder_ptr->is_file_exists(filename)) return false;
 
                 return shared_folder_ptr->remove_file(filename);
+            }
+
+            bool isdir(const path::Path &path) const
+            {
+                auto temp_ptr = this->_go_to_folder(path);
+                return !temp_ptr.expired();
             }
     };
 }

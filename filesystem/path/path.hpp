@@ -189,10 +189,25 @@ namespace galfile::filesystem::path
 
             std::string general_string() const
             {
-                return helper::merge_list_string_with_separator(
-                    this->paths,
+                auto paths = this->paths;
+
+                bool is_absolute_path = this->is_absolute();
+                if (is_absolute_path)
+                {
+                    paths.pop_front();
+                }
+
+                auto str_path = helper::merge_list_string_with_separator(
+                    paths,
                     '/'
                 );
+
+                if (is_absolute_path)
+                {
+                    str_path = '/' + str_path;
+                }
+
+                return str_path;
             }
 
             bool is_absolute() const
