@@ -183,6 +183,27 @@ namespace galfile::filesystem
                 return shared_folder_ptr->remove_file(filename);
             }
 
+            std::weak_ptr<folder::Folder> cpdir(
+                const path::Path &src_path,
+                const path::Path &dst_parent_path
+            )
+            {
+                auto src_folder_ptr = this->_go_to_folder(src_path);
+                auto dst_parent_folder_ptr = this->_go_to_folder(dst_parent_path);
+
+                auto shared_src_folder_ptr = src_folder_ptr.lock();
+                auto shared_dst_parent_folder_ptr = dst_parent_folder_ptr.lock();
+
+                if (!shared_src_folder_ptr) return {};
+                if (!shared_dst_parent_folder_ptr) return {};
+
+                return shared_dst_parent_folder_ptr->append_folder(
+                    std::make_shared<folder::Folder>(
+                        *shared_src_folder_ptr
+                    )
+                );
+            }
+
             bool isdir(const path::Path &path) const
             {
                 auto temp_ptr = this->_go_to_folder(path);
