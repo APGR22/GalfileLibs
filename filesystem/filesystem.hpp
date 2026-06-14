@@ -188,5 +188,17 @@ namespace galfile::filesystem
                 auto temp_ptr = this->_go_to_folder(path);
                 return !temp_ptr.expired();
             }
+
+            bool isfile(const path::Path &filepath)
+            {
+                auto directory_path = filepath.parent();
+                auto filename = filepath.name();
+
+                auto directory_ptr = this->_go_to_folder(directory_path);
+                auto shared_directory_ptr = directory_ptr.lock();
+                if (!shared_directory_ptr) return false;
+
+                return shared_directory_ptr->is_file_exists(filename);
+            }
     };
 }

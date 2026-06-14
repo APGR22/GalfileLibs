@@ -29,6 +29,8 @@ int main()
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
+    std::cout << filesystem.pwd() << std::endl;
+
     filesystem.rmdirs("/media/linux");
 
     std::cout << filesystem.pwd() << std::endl;
@@ -40,6 +42,31 @@ int main()
     std::cout
     << "Is dir \"/media/linux\" exists: "
     << filesystem.isdir("/media/linux")
+    << std::endl;
+
+    auto file_ptr = filesystem.mkfile("fileee", "test/example/test.txt");
+    if (auto shared_file_ptr = file_ptr.lock())
+    {
+        std::cout
+        << "Success create a file: "
+        << shared_file_ptr->get_name()
+        << std::endl;
+    }
+
+    std::cout
+    << "Is /fileee file exists: "
+    << filesystem.isfile("fileee")
+    << "; And is expired: "
+    << file_ptr.expired()
+    << std::endl;
+
+    filesystem.rmfile("fileee");
+
+    std::cout
+    << "Is /fileee file exists: "
+    << filesystem.isfile("fileee")
+    << "; And is expired: "
+    << file_ptr.expired()
     << std::endl;
 
     return 0;
