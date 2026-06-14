@@ -21,28 +21,32 @@ int main()
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
-    auto mv_folder_ptr = filesystem.mvdir("/media/linux/game", "/");
-    if (auto shared_mv_folder_ptr = mv_folder_ptr.lock())
+    auto file_ptr = filesystem.mkfile("/media/file.txt", "test/example/test.txt");
+    if (auto shared_file_ptr = file_ptr.lock())
     {
         std::cout
-        << "Success to move dir: "
-        << shared_mv_folder_ptr->get_name()
+        << "Success to create a file: "
+        << shared_file_ptr->get_name()
+        << std::endl;
+    }
+
+    auto cp_file_ptr = filesystem.cpfile("/media/file.txt", "/");
+    if (auto shared_cp_file_ptr = cp_file_ptr.lock())
+    {
+        std::cout
+        << "Success to create a file: "
+        << shared_cp_file_ptr->get_name()
         << std::endl;
     }
 
     std::cout
-    << "Is dir \"/game\" exists: "
-    << filesystem.isdir("/game")
+    << "Is \"/media/file.txt\" file exists: "
+    << filesystem.isfile("/media/file.txt")
     << std::endl;
 
     std::cout
-    << "Is dir \"/media/linux/game\" exists: "
-    << filesystem.isdir("/media/linux/game")
-    << std::endl;
-
-    std::cout
-    << "Is old folder_ptr still exists: "
-    << !folder_ptr.expired()
+    << "Is \"/file.txt\" file exists: "
+    << filesystem.isfile("/file.txt")
     << std::endl;
 
     return 0;

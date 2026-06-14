@@ -204,6 +204,37 @@ namespace galfile::filesystem
                 );
             }
 
+            std::weak_ptr<file::File> cpfile(
+                const path::Path &src_filepath,
+                const path::Path &dst_parent_filepath
+            )
+            {
+                if (src_filepath == "/") return {};
+
+                auto filename = src_filepath.name();
+
+                auto src_parent_filepath = src_filepath.parent();
+
+                auto src_parent_filepath_ptr = this->_go_to_folder(src_parent_filepath);
+                auto dst_parent_filepath_ptr = this->_go_to_folder(dst_parent_filepath);
+
+                auto shared_src_parent_filepath_ptr = src_parent_filepath_ptr.lock();
+                auto shared_dst_parent_filepath_ptr = dst_parent_filepath_ptr.lock();
+
+                if (!shared_src_parent_filepath_ptr) return {};
+                if (!shared_dst_parent_filepath_ptr) return {};
+
+                auto src_file_ptr = shared_src_parent_filepath_ptr->get_file(filename);
+                auto shared_src_file_ptr = src_file_ptr.lock();
+                if (!shared_src_file_ptr) return {};
+
+                return shared_dst_parent_filepath_ptr->append_file(
+                    std::make_shared<file::File>(
+                        *shared_src_file_ptr
+                    )
+                );
+            }
+
             std::weak_ptr<folder::Folder> mvdir(
                 const path::Path &src_path,
                 const path::Path &dst_parent_path
