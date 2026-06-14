@@ -14,26 +14,23 @@ int main()
     std::weak_ptr<galfile::filesystem::folder::Folder> parent_folder_ptr;
 
     auto folder_ptr = filesystem.mkdirs("/media/linux/game");
-    if (!folder_ptr.expired())
+    if (auto shared_folder_ptr = folder_ptr.lock())
     {
-        auto shared_folder_ptr = folder_ptr.lock();
         std::cout << shared_folder_ptr->get_name() << std::endl;
 
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
     folder_ptr = filesystem.cd("media");
-    if (!folder_ptr.expired())
+    if (auto shared_folder_ptr = folder_ptr.lock())
     {
-        auto shared_folder_ptr = folder_ptr.lock();
         std::cout << shared_folder_ptr->get_name() << std::endl;
 
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
-    if (!parent_folder_ptr.expired())
+    if (auto shared_parent_folder_ptr = parent_folder_ptr.lock())
     {
-        auto shared_parent_folder_ptr = parent_folder_ptr.lock();
         std::cout
         << "Parent: "
         << shared_parent_folder_ptr->get_name()
@@ -53,10 +50,8 @@ int main()
     }
 
     auto file_ptr = filesystem.mkfile("/", "fileeee", "test/example/test.txt");
-    if (!file_ptr.expired())
+    if (auto shared_file_ptr = file_ptr.lock())
     {
-        auto shared_file_ptr = file_ptr.lock();
-
         std::cout
         << "Success to create a file: "
         << shared_file_ptr->get_name()
