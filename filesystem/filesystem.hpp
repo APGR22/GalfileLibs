@@ -69,6 +69,11 @@ namespace galfile::filesystem
                 return this->__curdir_ptr;
             }
 
+            std::weak_ptr<folder::Folder> pwd() const
+            {
+                return this->__curdir_ptr;
+            }
+
             std::weak_ptr<folder::Folder> mkdirs(const path::Path &path)
             {
                 std::weak_ptr<folder::Folder> curdir_ptr;
