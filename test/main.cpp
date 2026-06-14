@@ -21,7 +21,7 @@ int main()
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
 
-    folder_ptr = filesystem.cd("media");
+    folder_ptr = filesystem.cd("media/linux");
     if (auto shared_folder_ptr = folder_ptr.lock())
     {
         std::cout << shared_folder_ptr->get_name() << std::endl;

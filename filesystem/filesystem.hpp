@@ -30,7 +30,8 @@ namespace galfile::filesystem
                 }
 
                 const auto &path_parts = path.parts();
-                std::weak_ptr<folder::Folder> temp_ptr;
+                auto shared_curdir_ptr = curdir_ptr.lock();
+                std::weak_ptr<folder::Folder> temp_curdir_ptr;
                 // skip first element ["." or "/"]
                 for (
                     auto it = ++path_parts.begin();
@@ -40,12 +41,13 @@ namespace galfile::filesystem
                 {
                     const std::string &path_name = *it;
 
-                    auto shared_curdir_ptr = curdir_ptr.lock();
+                    if (!shared_curdir_ptr) return {};
 
-                    temp_ptr = shared_curdir_ptr->get_folder(path_name);
-                    if (temp_ptr.expired()) return {};
+                    temp_curdir_ptr = shared_curdir_ptr->get_folder(path_name);
+                    if (temp_curdir_ptr.expired()) return {};
 
-                    curdir_ptr = temp_ptr;
+                    curdir_ptr = temp_curdir_ptr;
+                    shared_curdir_ptr = curdir_ptr.lock();
                 }
 
                 return curdir_ptr;
@@ -60,30 +62,10 @@ namespace galfile::filesystem
 
             std::weak_ptr<folder::Folder> cd(const path::Path &path)
             {
-                if (path.is_absolute())
-                {
-                    this->__curdir_ptr = this->__root;
-                }
+                auto temp_curdir_ptr = this->_go_to_folder(path);
+                if (temp_curdir_ptr.expired()) return {};
 
-                const auto &path_parts = path.parts();
-
-                std::weak_ptr<folder::Folder> temp_ptr;
-                auto __shared_curdir_ptr = this->__curdir_ptr.lock();
-                // skip first element ["." or "/"]
-                for (
-                    auto it = ++path_parts.begin();
-                    it != path_parts.end();
-                    it++
-                )
-                {
-                    const std::string &pathname = *it;
-
-                    temp_ptr = __shared_curdir_ptr->get_folder(pathname);
-                    if (temp_ptr.expired()) return {};
-
-                    this->__curdir_ptr = temp_ptr;
-                }
-
+                this->__curdir_ptr = temp_curdir_ptr;
                 return this->__curdir_ptr;
             }
 
@@ -101,6 +83,7 @@ namespace galfile::filesystem
                 auto prevdir_ptr = curdir_ptr;
 
                 const auto &path_parts = path.parts();
+                auto shared_curdir_ptr = curdir_ptr.lock();
                 // skip first element ["." or "/"]
                 for (
                     auto it = ++path_parts.begin();
@@ -108,14 +91,16 @@ namespace galfile::filesystem
                     it++
                 )
                 {
-                    const std::string &pathname = *it;
+                    if (!shared_curdir_ptr) return {};
 
-                    auto shared_curdir_ptr = curdir_ptr.lock();
+                    const std::string &pathname = *it;
 
                     curdir_ptr = shared_curdir_ptr->append_folder(
                         folder::create_new(pathname, true, curdir_ptr)
                     );
-                    if (!(shared_curdir_ptr = curdir_ptr.lock())) return {};
+
+                    shared_curdir_ptr = curdir_ptr.lock();
+                    if (!shared_curdir_ptr) return {};
 
                     shared_curdir_ptr->set_parent(prevdir_ptr);
                     prevdir_ptr = curdir_ptr;
@@ -131,13 +116,10 @@ namespace galfile::filesystem
             )
             {
                 auto folder_ptr = this->_go_to_folder(directory_path);
-                std::shared_ptr<folder::Folder> shared_folder_ptr;
-                if (!(shared_folder_ptr = folder_ptr.lock())) return {};
+                auto shared_folder_ptr = folder_ptr.lock();
+                if (!shared_folder_ptr) return {};
 
-                if (shared_folder_ptr->is_file_exists(filename))
-                {
-                    return {};
-                }
+                if (shared_folder_ptr->is_file_exists(filename)) return {};
 
                 return shared_folder_ptr->append_file(
                     file::create_new(
@@ -151,8 +133,8 @@ namespace galfile::filesystem
             bool rmdirs(const path::Path &path)
             {
                 auto folder_ptr = this->_go_to_folder(path);
-                std::shared_ptr<folder::Folder> shared_folder_ptr;
-                if (!(shared_folder_ptr = folder_ptr.lock())) return {};
+                auto shared_folder_ptr = folder_ptr.lock();
+                if (!shared_folder_ptr) return false;
 
                 if (shared_folder_ptr.get() == this->__root.get())
                 {
