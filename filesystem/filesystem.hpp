@@ -103,7 +103,7 @@ namespace galfile::filesystem
                     const auto &name = pair.first;
                     const auto &item = pair.second;
 
-                    std::cout << buffer_member_indent_begin + name << std::endl;
+                    std::cout << buffer_member_indent_begin + name << '\n';
 
                     auto next_it = ++it;
                     it--;
@@ -162,11 +162,11 @@ namespace galfile::filesystem
                 auto shared_folder_ptr = folder_ptr.lock();
                 if (!shared_folder_ptr)
                 {
-                    std::cout << "(ERROR: Not found)" << std::endl;
+                    std::cout << "(ERROR: Not found)" << '\n';
                     return;
                 }
 
-                std::cout << shared_folder_ptr->get_name() << std::endl;
+                std::cout << shared_folder_ptr->get_name() << '\n';
 
                 std::string indent_arrow(indent, '-');
                 std::string indent_spaces(indent, ' ');

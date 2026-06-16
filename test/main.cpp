@@ -16,7 +16,7 @@ int main()
     auto folder_ptr = filesystem.mkdirs("/media/linux/game");
     if (auto shared_folder_ptr = folder_ptr.lock())
     {
-        std::cout << shared_folder_ptr->get_name() << std::endl;
+        std::cout << shared_folder_ptr->get_name() << '\n';
 
         parent_folder_ptr = shared_folder_ptr->get_parent();
     }
@@ -27,7 +27,7 @@ int main()
         std::cout
         << "Success to create a file: "
         << shared_file_ptr->get_name()
-        << std::endl;
+        << '\n';
     }
 
     filesystem.tree__expensive();
