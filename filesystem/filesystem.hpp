@@ -57,7 +57,7 @@ namespace galfile::filesystem
             }
 
             void _tree_recursive__expensive(
-                std::weak_ptr<folder::Folder> next_folder_ptr,
+                const std::shared_ptr<folder::Folder> &next_folder_ptr,
                 const std::string &buffer_indent_begin = "",
                 const std::string &indent_arrow = "-",
                 const std::string &indent_spaces = " "
@@ -73,41 +73,25 @@ namespace galfile::filesystem
                     buffer_indent_begin + " " + indent_spaces
                 ;
 
-                auto shared_folder_ptr = next_folder_ptr.lock();
-                if (!shared_folder_ptr)
-                {
-                    std::cout << "(ERROR: Failed to lock)" << std::endl;
-                }
-
-                const auto &folders = shared_folder_ptr->get_all_folders();
-                const auto &files = shared_folder_ptr->get_all_files();
+                const auto &folders = next_folder_ptr->get_all_folders();
+                const auto &files = next_folder_ptr->get_all_files();
 
                 std::map<
                     std::string,
-                    std::pair<
-                        std::weak_ptr<folder::Folder>,
-                        std::weak_ptr<file::File>
-                    >
+                    std::shared_ptr<folder::Folder>
                 > sorted_map;
 
                 for (const auto &folder : folders)
                 {
-                    sorted_map[folder.first] = {
-                        folder.second,
-                        {}
-                    };
+                    sorted_map[folder.first] = folder.second;
                 }
 
                 for (const auto &file : files)
                 {
-                    sorted_map[file.first] = {
-                        {},
-                        file.second
-                    };
+                    sorted_map[file.first] = {};
                 }
 
                 std::string buffer_next;
-                std::string name;
                 for (
                     auto it = sorted_map.begin();
                     it != sorted_map.end();
@@ -116,28 +100,8 @@ namespace galfile::filesystem
                 {
                     const auto &pair = *it;
 
-                    const auto &key = pair.first;
+                    const auto &name = pair.first;
                     const auto &item = pair.second;
-
-                    const auto &folder_ptr = item.first;
-                    const auto &file_ptr = item.second;
-
-                    auto shared_folder_ptr = folder_ptr.lock();
-                    auto shared_file_ptr = file_ptr.lock();
-
-                    if (shared_folder_ptr)
-                    {
-                        name = shared_folder_ptr->get_name();
-                    }
-                    else if (shared_file_ptr)
-                    {
-                        name = shared_file_ptr->get_name();
-                    }
-                    else
-                    {
-                        std::cout << "(ERROR: Failed to lock item)" << std::endl;
-                        return;
-                    }
 
                     std::cout << buffer_member_indent_begin + name << std::endl;
 
@@ -152,10 +116,10 @@ namespace galfile::filesystem
                         buffer_next = buffer_next_indent_begin;
                     }
 
-                    if (shared_folder_ptr)
+                    if (item)
                     {
                         this->_tree_recursive__expensive(
-                            folder_ptr,
+                            item,
                             buffer_next,
                             indent_arrow,
                             indent_spaces
@@ -211,7 +175,7 @@ namespace galfile::filesystem
                 indent_spaces += "  ";
 
                 this->_tree_recursive__expensive(
-                    folder_ptr,
+                    shared_folder_ptr,
                     "",
                     indent_arrow,
                     indent_spaces
