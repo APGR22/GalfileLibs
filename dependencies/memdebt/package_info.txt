@@ -1,5 +1,0 @@
-Made by: https://github.com/APGR22/
-Repo url: https://github.com/APGR22/memdebt.git
-Version: -
-Copyright: 2026 APGR22
-License: MIT
