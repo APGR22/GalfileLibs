@@ -41,17 +41,17 @@ namespace galfile::io::object
                 return 0;
             }
 
-            int fseek(int64_t offset, int origin)
+            int fseek(int64_t offset, int origin) const
             {
                 return ::fseek(this->file, offset, origin);
             }
 
-            long ftell()
+            long ftell() const
             {
                 return ::ftell(this->file);
             }
 
-            int fgetc()
+            int fgetc() const
             {
                 return ::fgetc(this->file);
             }
@@ -60,7 +60,7 @@ namespace galfile::io::object
                 void *__restrict__ dst_buffer,
                 size_t element_size,
                 size_t count
-            )
+            ) const
             {
                 return ::fread(dst_buffer, element_size, count, this->file);
             }
