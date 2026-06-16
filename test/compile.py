@@ -17,6 +17,9 @@ options = (
     # "-g",
     "-std=c++20",
 )
+includes = (
+    "-I.",
+)
 
 if SYSTEM == "Windows":
     output += ".exe"
@@ -26,6 +29,7 @@ elif SYSTEM == "Linux":
 # os.chdir("..")
 subprocess.call([
     compiler,
+    *includes,
     "-o",
     output,
     *files,

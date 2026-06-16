@@ -12,6 +12,7 @@
 #include "../../io/object/single_file.hpp"
 #include "../../type/int.hpp"
 #include "../folder/folder_fwd.hpp"
+#include <dependencies/json/json.hpp>
 
 namespace galfile::filesystem::file
 {
@@ -208,6 +209,14 @@ namespace galfile::filesystem::file
                 return this->get_size() == 0;
             }
 
+            void save_configuration(nlohmann::json &dst_json) const
+            {
+                dst_json["type"] = "file";
+                dst_json["name"] = this->__name;
+                dst_json["filepath"] = this->__filepath.generic_string();
+                dst_json["auto_close"] = this->__auto_close;
+            }
+
             File &operator=(const File &other)
             {
                 if (this != &other)
@@ -269,15 +278,12 @@ namespace galfile::filesystem::file
         auto io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return std::make_shared<File>(
-            File(
-                {},
-                io_object,
-                name,
-                filepath,
-                auto_close
-            )
+        auto shared_file = std::make_shared<File>(
+            File({}, io_object, name, filepath, false)
         );
+        shared_file->set_auto_close(auto_close);
+
+        return shared_file;
     }
 
     template<class T = io::object::SingleFile>
@@ -300,15 +306,43 @@ namespace galfile::filesystem::file
 
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
-        return std::make_shared<File>(
-            File(
-                {},
-                io_object,
-                name,
-                filepath,
-                auto_close
-            )
+        auto shared_file = std::make_shared<File>(
+            File({}, io_object, name, filepath, false)
         );
+        shared_file->set_auto_close(auto_close);
+
+        return shared_file;
+    }
+
+    template<class T = io::object::SingleFile>
+    std::enable_if_t<
+        std::is_base_of_v<io::Object, T>,
+        std::shared_ptr<File>
+    >
+        load_configuration(const nlohmann::json &src_json)
+    {
+        std::string name = src_json["name"];
+        std::filesystem::path filepath = src_json["filepath"];
+        bool auto_close = src_json["auto_close"];
+
+        auto io_object = std::make_shared<T>(T(filepath));
+
+        if (!std::filesystem::is_regular_file(filepath))
+        {
+            io_object->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
+            if (io_object->is_opened())
+            {
+                io_object->fclose();
+            }
+        }
+        io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+
+        auto shared_file = std::make_shared<File>(
+            File({}, io_object, name, filepath, false)
+        );
+        shared_file->set_auto_close(auto_close);
+
+        return shared_file;
     }
 }
 

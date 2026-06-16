@@ -9,28 +9,40 @@ int main()
         "test/example/test.txt",
         "custom"
     );
-    auto filesystem = galfile::filesystem::Filesystem();
 
-    std::weak_ptr<galfile::filesystem::folder::Folder> parent_folder_ptr;
+    unsigned char buffer[] = "TEST_0123456789";
+    file->write(0, buffer, sizeof(buffer)-1);
 
-    auto folder_ptr = filesystem.mkdirs("/media/linux/game");
-    if (auto shared_folder_ptr = folder_ptr.lock())
+    std::cout
+    << file->get_filepath().generic_string()
+    << ": "
+    << file->is_opened()
+    << '\n';
+
+    file->close();
+
+    nlohmann::json json;
+    file->save_configuration(json);
+
+    auto load_file = galfile::filesystem::file::load_configuration(json);
+
+    std::cout
+    << load_file->get_filepath().generic_string()
+    << ": "
+    << load_file->is_opened()
+    << '\n';
+
+    unsigned char buffer_output[sizeof(buffer)-1];
+    std::cout
+    << "load_file read: "
+    << load_file->read(0, buffer_output, sizeof(buffer_output))
+    << '\n';
+
+    for (uint64_t index = 0; index < sizeof(buffer_output); index++)
     {
-        std::cout << shared_folder_ptr->get_name() << '\n';
-
-        parent_folder_ptr = shared_folder_ptr->get_parent();
+        putc(buffer_output[index], stdout);
     }
-
-    auto file_ptr = filesystem.mkfile("/media/file.txt", "test/example/test.txt");
-    if (auto shared_file_ptr = file_ptr.lock())
-    {
-        std::cout
-        << "Success to create a file: "
-        << shared_file_ptr->get_name()
-        << '\n';
-    }
-
-    filesystem.tree__expensive();
+    putc('\n', stdout);
 
     return 0;
 }
