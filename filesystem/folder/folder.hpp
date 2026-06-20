@@ -61,20 +61,21 @@ namespace galfile::filesystem::folder
                 other.__folders.clear();
             }
 
-            std::weak_ptr<file::File> append_file(
+            std::shared_ptr<file::File> append_file(
                 const std::shared_ptr<file::File> &file
             )
             {
                 if (this->__files.contains(file->get_name())) return {};
                 if (this->__folders.contains(file->get_name())) return {};
 
-                auto pair = this->__files.insert({file->get_name(), file});
-                auto &item = pair.first->second;
+                file->set_parent(this->weak_from_this());
 
-                return item;
+                this->__files.insert({file->get_name(), file});
+
+                return file;
             }
 
-            std::weak_ptr<Folder> append_folder(
+            std::shared_ptr<Folder> append_folder(
                 const std::shared_ptr<Folder> &folder
             )
             {
@@ -82,11 +83,11 @@ namespace galfile::filesystem::folder
                 if (this->__folders.contains(folder->__name)) return {};
                 if (this->__files.contains(folder->__name)) return {};
 
-                auto pair = this->__folders.insert({folder->__name, folder});
-                auto &item = pair.first->second;
-                item->__parent = this->weak_from_this();
+                folder->set_parent(this->weak_from_this());
 
-                return item;
+                this->__folders.insert({folder->__name, folder});
+
+                return folder;
             }
 
             void set_parent(const std::weak_ptr<Folder> &parent)
@@ -94,7 +95,12 @@ namespace galfile::filesystem::folder
                 this->__parent = parent;
             }
 
-            const auto &get_parent() const
+            std::shared_ptr<Folder> get_parent() const
+            {
+                return this->__parent.lock();
+            }
+
+            const std::weak_ptr<Folder> &get_parent_weak() const
             {
                 return this->__parent;
             }
@@ -104,7 +110,7 @@ namespace galfile::filesystem::folder
                 return this->__name;
             }
 
-            std::weak_ptr<file::File> get_file(const std::string &name)
+            std::shared_ptr<file::File> get_file(const std::string &name)
             {
                 if (!this->__files.contains(name))
                 {
@@ -114,7 +120,7 @@ namespace galfile::filesystem::folder
                 return this->__files.at(name);
             }
 
-            std::weak_ptr<Folder> get_folder(const std::string &name)
+            std::shared_ptr<Folder> get_folder(const std::string &name)
             {
                 if (!this->__folders.contains(name))
                 {

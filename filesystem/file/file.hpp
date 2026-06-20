@@ -194,7 +194,12 @@ namespace galfile::filesystem::file
                 return this->__filepath;
             }
 
-            const std::weak_ptr<folder::Folder> &get_parent() const
+            std::shared_ptr<folder::Folder> get_parent() const
+            {
+                return this->__parent.lock();
+            }
+
+            const std::weak_ptr<folder::Folder> &get_parent_weak() const
             {
                 return this->__parent;
             }
