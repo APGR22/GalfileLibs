@@ -91,5 +91,10 @@ namespace galfile::io::object
             {
                 return this->file != nullptr;
             }
+
+            bool is_exists() const
+            {
+                return std::filesystem::is_regular_file(this->_filepath);
+            }
     };
 }

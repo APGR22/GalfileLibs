@@ -39,5 +39,6 @@ namespace galfile::io
             virtual int fclose() = 0;
 
             virtual bool is_opened() const = 0;
+            virtual bool is_exists() const = 0;
     };
 }
