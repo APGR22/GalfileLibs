@@ -63,6 +63,16 @@ namespace galfile::filesystem::file
                 other.__filepath.clear();
             }
 
+            void reopen()
+            {
+                if (this->__io_ptr->is_opened())
+                {
+                    this->__io_ptr->fclose();
+                }
+
+                this->__io_ptr->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+            }
+
             int read_c(type::seekpos_t seekpos) const
             {
                 if (!this->__io_ptr->is_opened()) return -1;

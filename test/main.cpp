@@ -15,5 +15,17 @@ int main()
 
     file->write_str(0, "Apa saja lah");
 
+    file->close();
+    if (!file->is_opened())
+    {
+        std::cout << "File is closed" << '\n';
+    }
+
+    file->reopen();
+    if (file->is_opened())
+    {
+        std::cout << "File is reopened" << '\n';
+    }
+
     return 0;
 }
