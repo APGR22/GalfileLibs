@@ -139,6 +139,21 @@ namespace galfile::filesystem::file
                 );
             }
 
+            size_t write_str(
+                type::seekpos_t seekpos,
+                const std::string &str
+            )
+            {
+                if (!this->__io_ptr->is_opened()) return 0;
+
+                this->__io_ptr->fseek(seekpos, SEEK_SET);
+                return this->__io_ptr->fwrite(
+                    str.c_str(),
+                    sizeof(char),
+                    str.size()
+                );
+            }
+
             bool clear()
             {
                 this->close();

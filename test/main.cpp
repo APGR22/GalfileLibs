@@ -13,8 +13,7 @@ int main()
     std::cout << folder->get_name() << '\n';
     std::cout << file->get_name() << '\n';
 
-    unsigned char text[] = "Apa saja";
-    file->write(0, text, sizeof(text)-1);
+    file->write_str(0, "Apa saja lah");
 
     return 0;
 }
