@@ -24,7 +24,7 @@ namespace galfile::filesystem::folder
                 std::shared_ptr<Folder>
             > __folders;
 
-            bool __auto_close_files = false;
+            bool __auto_close_files = true;
 
         public:
             Folder(
@@ -144,8 +144,11 @@ namespace galfile::filesystem::folder
             {
                 if (!this->__files.contains(name)) return false;
 
-                this->__files.at(name)
-                    ->set_auto_close(this->__auto_close_files);
+                if (this->__auto_close_files)
+                {
+                    this->__files.at(name)->close();
+                }
+
                 this->__files.erase(name);
 
                 return true;
@@ -163,10 +166,13 @@ namespace galfile::filesystem::folder
 
             void clear()
             {
-                for (auto &it : this->__files)
+                if (this->__auto_close_files)
                 {
-                    auto &file = it.second;
-                    file->set_auto_close(this->__auto_close_files);
+                    for (auto &it : this->__files)
+                    {
+                        auto &file = it.second;
+                        file->close();
+                    }
                 }
 
                 this->__files.clear();
@@ -239,7 +245,7 @@ namespace galfile::filesystem::folder
 
     inline auto create_new(
         const std::string &name,
-        bool auto_close_files = false,
+        bool auto_close_files = true,
         std::weak_ptr<Folder> parent = {}
     )
     {
