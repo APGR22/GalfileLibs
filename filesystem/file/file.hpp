@@ -70,6 +70,15 @@ namespace galfile::filesystem::file
                     this->__io_ptr->fclose();
                 }
 
+                if (this->__io_ptr->is_exists())
+                {
+                    this->__io_ptr->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
+                    if (this->__io_ptr->is_opened())
+                    {
+                        this->__io_ptr->fclose();
+                    }
+                }
+
                 this->__io_ptr->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
             }
 
