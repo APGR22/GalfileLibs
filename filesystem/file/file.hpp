@@ -23,38 +23,33 @@ namespace galfile::filesystem::file
             std::shared_ptr<io::Object> __io_ptr;
             std::string __name;
             std::filesystem::path __filepath;
-            bool __auto_close = true;
 
         public:
             File(
                 std::weak_ptr<folder::Folder> parent,
                 const std::shared_ptr<io::Object> &io_ptr,
                 const std::string &name,
-                const std::filesystem::path &filepath,
-                bool auto_close
+                const std::filesystem::path &filepath
             )
             :
                 __parent(parent),
                 __io_ptr(io_ptr),
                 __name(name),
-                __filepath(filepath),
-                __auto_close(auto_close)
+                __filepath(filepath)
             {}
 
             File(const File &other)
             :
                 __io_ptr(other.__io_ptr),
                 __name(other.__name),
-                __filepath(other.__filepath),
-                __auto_close(other.__auto_close)
+                __filepath(other.__filepath)
             {}
 
             File(File &&other)
             :
                 __io_ptr(other.__io_ptr),
                 __name(other.__name),
-                __filepath(other.__filepath),
-                __auto_close(other.__auto_close)
+                __filepath(other.__filepath)
             {
                 if (this == &other) return;
 
@@ -194,15 +189,10 @@ namespace galfile::filesystem::file
 
             void close()
             {
-                if (this->__io_ptr->is_opened() && this->__auto_close)
+                if (this->__io_ptr->is_opened())
                 {
                     this->__io_ptr->fclose();
                 }
-            }
-
-            void set_auto_close(bool value)
-            {
-                this->__auto_close = value;
             }
 
             void set_parent(const std::weak_ptr<folder::Folder> &parent)
@@ -253,7 +243,6 @@ namespace galfile::filesystem::file
                 dst_json["type"] = "file";
                 dst_json["name"] = this->__name;
                 dst_json["filepath"] = this->__filepath.generic_string();
-                dst_json["auto_close"] = this->__auto_close;
             }
 
             File &operator=(const File &other)
@@ -265,7 +254,6 @@ namespace galfile::filesystem::file
                     this->__io_ptr = other.__io_ptr;
                     this->__name = other.__name;
                     this->__filepath = other.__filepath;
-                    this->__auto_close = other.__auto_close;
                 }
 
                 return *this;
@@ -280,7 +268,6 @@ namespace galfile::filesystem::file
                     this->__io_ptr = other.__io_ptr;
                     this->__name = other.__name;
                     this->__filepath = other.__filepath;
-                    this->__auto_close = other.__auto_close;
 
                     other.__filepath.clear();
                     other.__name.clear();
@@ -310,17 +297,15 @@ namespace galfile::filesystem::file
     >
         open_existing(
             const std::filesystem::path &filepath,
-            const std::string &name,
-            bool auto_close = true
+            const std::string &name
     )
     {
         auto io_object = std::make_shared<T>(T(filepath));
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath, false)
+            File({}, io_object, name, filepath)
         );
-        shared_file->set_auto_close(auto_close);
 
         return shared_file;
     }
@@ -332,8 +317,7 @@ namespace galfile::filesystem::file
     >
         create_new(
             const std::filesystem::path &filepath,
-            const std::string &name,
-            bool auto_close = true
+            const std::string &name
     )
     {
         auto io_object = std::make_shared<T>(T(filepath));
@@ -346,9 +330,8 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath, false)
+            File({}, io_object, name, filepath)
         );
-        shared_file->set_auto_close(auto_close);
 
         return shared_file;
     }
@@ -362,7 +345,6 @@ namespace galfile::filesystem::file
     {
         std::string name = src_json["name"];
         std::filesystem::path filepath = src_json["filepath"];
-        bool auto_close = src_json["auto_close"];
 
         auto io_object = std::make_shared<T>(T(filepath));
 
@@ -377,10 +359,8 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath, false)
+            File({}, io_object, name, filepath)
         );
-        shared_file->set_auto_close(auto_close);
-
         return shared_file;
     }
 }

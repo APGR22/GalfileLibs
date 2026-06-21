@@ -205,7 +205,7 @@ namespace galfile::filesystem
                     const std::string &pathname = *it;
 
                     curdir_ptr = curdir_ptr->append_folder(
-                        folder::create_new(pathname, true, curdir_ptr)
+                        folder::create_new(pathname, curdir_ptr)
                     );
                     if (!curdir_ptr) return {};
 
@@ -232,8 +232,7 @@ namespace galfile::filesystem
                 return folder_ptr->append_file(
                     file::create_new(
                         physical_filepath,
-                        filename,
-                        true
+                        filename
                     )
                 );
             }

@@ -24,18 +24,14 @@ namespace galfile::filesystem::folder
                 std::shared_ptr<Folder>
             > __folders;
 
-            bool __auto_close_files = true;
-
         public:
             Folder(
                 std::weak_ptr<Folder> parent,
-                const std::string &name,
-                bool auto_close_files
+                const std::string &name
             )
             :
                 __parent(parent),
-                __name(name),
-                __auto_close_files(auto_close_files)
+                __name(name)
             {}
 
             Folder(const Folder &other)
@@ -43,8 +39,7 @@ namespace galfile::filesystem::folder
                 __parent(other.__parent),
                 __name(other.__name),
                 __files(other.__files),
-                __folders(other.__folders),
-                __auto_close_files(other.__auto_close_files)
+                __folders(other.__folders)
             {}
 
             Folder(Folder &&other)
@@ -52,8 +47,7 @@ namespace galfile::filesystem::folder
                 __parent(other.__parent),
                 __name(other.__name),
                 __files(std::move(other.__files)),
-                __folders(std::move(other.__folders)),
-                __auto_close_files(other.__auto_close_files)
+                __folders(std::move(other.__folders))
             {
                 other.__parent.reset();
                 other.__name.clear();
@@ -144,11 +138,6 @@ namespace galfile::filesystem::folder
             {
                 if (!this->__files.contains(name)) return false;
 
-                if (this->__auto_close_files)
-                {
-                    this->__files.at(name)->close();
-                }
-
                 this->__files.erase(name);
 
                 return true;
@@ -166,22 +155,8 @@ namespace galfile::filesystem::folder
 
             void clear()
             {
-                if (this->__auto_close_files)
-                {
-                    for (auto &it : this->__files)
-                    {
-                        auto &file = it.second;
-                        file->close();
-                    }
-                }
-
                 this->__files.clear();
                 this->__folders.clear();
-            }
-
-            void set_auto_close_files(bool value)
-            {
-                this->__auto_close_files = value;
             }
 
             bool is_file_exists(const std::string &name) const
@@ -207,7 +182,6 @@ namespace galfile::filesystem::folder
                     this->__name = other.__name;
                     this->__files = other.__files;
                     this->__folders = other.__folders;
-                    this->__auto_close_files = other.__auto_close_files;
                 }
 
                 return *this;
@@ -221,7 +195,6 @@ namespace galfile::filesystem::folder
                     this->__name = other.__name;
                     this->__files = std::move(other.__files);
                     this->__folders = std::move(other.__folders);
-                    this->__auto_close_files = other.__auto_close_files;
 
                     other.__parent.reset();
                     other.__name.clear();
@@ -245,15 +218,11 @@ namespace galfile::filesystem::folder
 
     inline auto create_new(
         const std::string &name,
-        bool auto_close_files = true,
         std::weak_ptr<Folder> parent = {}
     )
     {
-        return std::make_shared<Folder>(Folder(
-            parent,
-            name,
-            auto_close_files
-            )
+        return std::make_shared<Folder>(
+            Folder(parent, name)
         );
     }
 }
