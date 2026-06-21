@@ -87,6 +87,11 @@ namespace galfile::io::object
                 return ret;
             }
 
+            const std::filesystem::path &get_filepath() const
+            {
+                return this->_filepath;
+            }
+
             bool is_opened() const
             {
                 return this->file != nullptr;

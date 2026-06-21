@@ -38,6 +38,8 @@ namespace galfile::io
             ) = 0;
             virtual int fclose() = 0;
 
+            virtual const std::filesystem::path &get_filepath() const = 0;
+
             virtual bool is_opened() const = 0;
             virtual bool is_exists() const = 0;
     };
