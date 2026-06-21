@@ -22,40 +22,34 @@ namespace galfile::filesystem::file
             std::weak_ptr<folder::Folder> __parent;
             std::shared_ptr<io::Object> __io_ptr;
             std::string __name;
-            std::filesystem::path __filepath;
 
         public:
             File(
                 std::weak_ptr<folder::Folder> parent,
                 const std::shared_ptr<io::Object> &io_ptr,
-                const std::string &name,
-                const std::filesystem::path &filepath
+                const std::string &name
             )
             :
                 __parent(parent),
                 __io_ptr(io_ptr),
-                __name(name),
-                __filepath(filepath)
+                __name(name)
             {}
 
             File(const File &other)
             :
                 __io_ptr(other.__io_ptr),
-                __name(other.__name),
-                __filepath(other.__filepath)
+                __name(other.__name)
             {}
 
             File(File &&other)
             :
                 __io_ptr(other.__io_ptr),
-                __name(other.__name),
-                __filepath(other.__filepath)
+                __name(other.__name)
             {
                 if (this == &other) return;
 
                 other.__name.clear();
                 other.__parent.reset();
-                other.__filepath.clear();
             }
 
             void reopen()
@@ -215,7 +209,7 @@ namespace galfile::filesystem::file
 
             const std::filesystem::path &get_filepath() const
             {
-                return this->__filepath;
+                return this->__io_ptr->get_filepath();
             }
 
             std::shared_ptr<folder::Folder> get_parent() const
@@ -242,7 +236,7 @@ namespace galfile::filesystem::file
             {
                 dst_json["type"] = "file";
                 dst_json["name"] = this->__name;
-                dst_json["filepath"] = this->__filepath.generic_string();
+                dst_json["filepath"] = this->__io_ptr->get_filepath().generic_string();
             }
 
             File &operator=(const File &other)
@@ -253,7 +247,6 @@ namespace galfile::filesystem::file
 
                     this->__io_ptr = other.__io_ptr;
                     this->__name = other.__name;
-                    this->__filepath = other.__filepath;
                 }
 
                 return *this;
@@ -267,9 +260,7 @@ namespace galfile::filesystem::file
 
                     this->__io_ptr = other.__io_ptr;
                     this->__name = other.__name;
-                    this->__filepath = other.__filepath;
 
-                    other.__filepath.clear();
                     other.__name.clear();
                 }
 
@@ -286,7 +277,6 @@ namespace galfile::filesystem::file
                 this->close();
                 this->__name.clear();
                 this->__parent.reset();
-                this->__filepath.clear();
             }
     };
 
@@ -304,7 +294,7 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath)
+            File({}, io_object, name)
         );
 
         return shared_file;
@@ -330,7 +320,7 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath)
+            File({}, io_object, name)
         );
 
         return shared_file;
@@ -359,7 +349,7 @@ namespace galfile::filesystem::file
         io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
 
         auto shared_file = std::make_shared<File>(
-            File({}, io_object, name, filepath)
+            File({}, io_object, name)
         );
         return shared_file;
     }

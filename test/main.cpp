@@ -27,5 +27,10 @@ int main()
         std::cout << "File is reopened" << '\n';
     }
 
+    std::cout
+    << "The filepath is: "
+    << file->get_filepath().generic_string()
+    << std::endl;
+
     return 0;
 }
