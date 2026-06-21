@@ -9,7 +9,7 @@ namespace galfile::io::object
     class SingleFile : public io::Object
     {
         private:
-            FILE *file = nullptr;
+            FILE *__file = nullptr;
 
         public:
             SingleFile(
@@ -23,37 +23,37 @@ namespace galfile::io::object
                 switch (mode)
                 {
                     case io::IOMode::NEW_EMPTY_AND_WRITE:
-                        this->file = ::fopen(
+                        this->__file = ::fopen(
                             this->_filepath.generic_string().c_str(),
                             "w"
                         );
                         break;
                     case io::IOMode::KEEP_EXISTING_AND_READ_WRITE:
-                        this->file = ::fopen(
+                        this->__file = ::fopen(
                             this->_filepath.generic_string().c_str(),
                             "rb+"
                         );
                         break;
                 }
 
-                if (!this->file) return -1;
+                if (!this->__file) return -1;
 
                 return 0;
             }
 
             int fseek(int64_t offset, int origin) const
             {
-                return ::fseek(this->file, offset, origin);
+                return ::fseek(this->__file, offset, origin);
             }
 
             long ftell() const
             {
-                return ::ftell(this->file);
+                return ::ftell(this->__file);
             }
 
             int fgetc() const
             {
-                return ::fgetc(this->file);
+                return ::fgetc(this->__file);
             }
 
             size_t fread(
@@ -62,12 +62,12 @@ namespace galfile::io::object
                 size_t count
             ) const
             {
-                return ::fread(dst_buffer, element_size, count, this->file);
+                return ::fread(dst_buffer, element_size, count, this->__file);
             }
 
             int fputc(int c)
             {
-                return ::fputc(c, this->file);
+                return ::fputc(c, this->__file);
             }
 
             size_t fwrite(
@@ -76,13 +76,13 @@ namespace galfile::io::object
                 size_t count
             )
             {
-                return ::fwrite(data, size, count, this->file);
+                return ::fwrite(data, size, count, this->__file);
             }
 
             int fclose()
             {
-                int ret = ::fclose(this->file);
-                this->file = nullptr;
+                int ret = ::fclose(this->__file);
+                this->__file = nullptr;
 
                 return ret;
             }
@@ -94,7 +94,7 @@ namespace galfile::io::object
 
             bool is_opened() const
             {
-                return this->file != nullptr;
+                return this->__file != nullptr;
             }
 
             bool is_exists() const
