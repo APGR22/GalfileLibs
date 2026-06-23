@@ -2,28 +2,24 @@
 #include <iostream>
 #include <cstring>
 #include "../io/object/multi_file.hpp"
+#include "../filesystem/file/file.hpp"
 
 int main()
 {
     galfile::io::object::MultiFile multifile("test/example/test.txt", 5);
-
-    multifile.fopen(galfile::io::IOMode::NEW_EMPTY_AND_WRITE);
-    multifile.fclose();
-    multifile.fopen(galfile::io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+    auto file = galfile::filesystem::file::create_new_from_value(multifile, "test");
 
     unsigned char text[] = "1234567890";
-    multifile.fwrite(text, sizeof(unsigned char), sizeof(text)-1);
+    file->write(0, text, sizeof(text)-1);
 
-    multifile.fputc('1');
+    file->write_c(1, '1');
 
-    multifile.fseek(-1, SEEK_CUR);
-    std::cout << (char)(multifile.fgetc()) << '\n';
+    std::cout << (char)(file->read_c(2)) << '\n';
 
     unsigned char get_text[sizeof(text) + 1];
     memset(get_text, 0, sizeof(get_text));
 
-    multifile.fseek(0, SEEK_SET);
-    multifile.fread(get_text, sizeof(unsigned char), sizeof(get_text) - 1);
+    file->read(0, get_text, sizeof(get_text) - 1);
 
     std::cout << reinterpret_cast<char *>(get_text) << '\n';
 

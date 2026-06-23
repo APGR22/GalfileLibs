@@ -305,12 +305,52 @@ namespace galfile::filesystem::file
         std::is_base_of_v<io::Object, T>,
         std::shared_ptr<File>
     >
+        open_existing_from_value(const T &value, const std::string &name)
+    {
+        auto io_object = std::make_shared<T>(value);
+        io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+
+        auto shared_file = std::make_shared<File>(
+            File({}, io_object, name)
+        );
+
+        return shared_file;
+    }
+
+    template<class T = io::object::SingleFile>
+    std::enable_if_t<
+        std::is_base_of_v<io::Object, T>,
+        std::shared_ptr<File>
+    >
         create_new(
             const std::filesystem::path &filepath,
             const std::string &name
     )
     {
         auto io_object = std::make_shared<T>(T(filepath));
+        io_object->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
+        if (io_object->is_opened())
+        {
+            io_object->fclose();
+        }
+
+        io_object->fopen(io::IOMode::KEEP_EXISTING_AND_READ_WRITE);
+
+        auto shared_file = std::make_shared<File>(
+            File({}, io_object, name)
+        );
+
+        return shared_file;
+    }
+
+    template<class T = io::object::SingleFile>
+    std::enable_if_t<
+        std::is_base_of_v<io::Object, T>,
+        std::shared_ptr<File>
+    >
+        create_new_from_value(const T &value, const std::string &name)
+    {
+        auto io_object = std::make_shared<T>(value);
         io_object->fopen(io::IOMode::NEW_EMPTY_AND_WRITE);
         if (io_object->is_opened())
         {
