@@ -3,27 +3,33 @@
 #include <cstring>
 #include "../io/object/multi_file.hpp"
 #include "../filesystem/file/file.hpp"
+#include "../filesystem/filesystem.hpp"
 
 int main()
 {
     galfile::io::object::MultiFile multifile("test/example/test.txt", 5);
     auto file = galfile::filesystem::file::create_new_from_value(multifile, "test");
 
-    unsigned char text[] = "1234567890";
-    file->write(0, text, sizeof(text)-1);
+    galfile::filesystem::Filesystem filesystem;
 
-    file->write_c(1, '1');
+    auto folder = filesystem.mkdirs("/media/linux");
+    folder->append_file(file);
+    filesystem.mkfile("/media/linux/test_1.txt", "test/example/test_1.txt");
 
-    std::cout << (char)(file->read_c(2)) << '\n';
+    folder = filesystem.mkdirs("/media/windows");
+    filesystem.mkfile("/media/windows/test", "test/example/test_2.txt");
 
-    unsigned char get_text[sizeof(text) + 1];
-    memset(get_text, 0, sizeof(get_text));
+    nlohmann::json json;
 
-    file->read(0, get_text, sizeof(get_text) - 1);
+    filesystem.save_configuration(json);
 
-    std::cout << reinterpret_cast<char *>(get_text) << '\n';
+    galfile::io::object::SingleFile configuration_file("test/example/filesystem.json");
+    configuration_file.fopen(galfile::io::NEW_EMPTY_AND_WRITE);
 
-    multifile.fclose();
+    std::string JSON = json.dump(4);
+    configuration_file.fwrite(JSON.c_str(), sizeof(char), JSON.size());
+
+    configuration_file.fclose();
 
     return 0;
 }

@@ -7,6 +7,7 @@
 #include <utility>
 #include "folder_fwd.hpp"
 #include "../file/file.hpp"
+#include <dependencies/json/json.hpp>
 
 namespace galfile::filesystem::folder
 {
@@ -172,6 +173,30 @@ namespace galfile::filesystem::folder
             bool is_empty() const noexcept
             {
                 return this->__files.empty() && this->__folders.empty();
+            }
+
+            void save_configuration(nlohmann::json &dst_json) const
+            {
+                dst_json["type"] = "folder";
+                dst_json["name"] = this->__name;
+
+                dst_json["files"] = nlohmann::json::object();
+                for (const auto &__pair : this->__files)
+                {
+                    const auto &__name = __pair.first;
+                    const auto &__file = __pair.second;
+
+                    __file->save_configuration(dst_json["files"][__name]);
+                }
+
+                dst_json["folders"] = nlohmann::json::object();
+                for (const auto &__pair : this->__folders)
+                {
+                    const auto &__name = __pair.first;
+                    const auto &__folder = __pair.second;
+
+                    __folder->save_configuration(dst_json["folders"][__name]);
+                }
             }
 
             Folder &operator=(const Folder &other)

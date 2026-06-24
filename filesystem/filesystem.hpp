@@ -7,6 +7,7 @@
 #include <map>
 #include "folder/folder.hpp"
 #include "path/path.hpp"
+#include <dependencies/json/json.hpp>
 
 namespace galfile::filesystem
 {
@@ -413,6 +414,14 @@ namespace galfile::filesystem
                 if (this->isfile(path)) return true;
 
                 return false;
+            }
+
+            void save_configuration(nlohmann::json &dst_json) const
+            {
+                dst_json["type"] = "filesystem";
+
+                dst_json["root"] = nlohmann::json::object();
+                this->__root->save_configuration(dst_json["root"]);
             }
     };
 }
